@@ -2,8 +2,8 @@
 
 Activer `pnpm` 
 
-```corepack enable
-corepack prepare pnpm@latest --activate```
+```corepack enable```
+```corepack prepare pnpm@latest --activate```
 
 Puis toutes les commandes seront pnpm !(pas npm)
 
