@@ -1,0 +1,23 @@
+name: Unit Test
+
+on:
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  test:
+    runs-on: self-hosted
+    container:
+      image: node:24-alpine
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup pnpm & install
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+          pnpm install --prefer-offline
+      - name: Unit test
+        run: pnpm run test
+      - name: End 2 End test
+        run: pnpm run test:e2e
