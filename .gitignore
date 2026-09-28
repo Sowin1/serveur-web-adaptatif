@@ -1,0 +1,204 @@
+# ============================================================
+# Dependencies
+# ============================================================
+node_modules/
+.pnp/
+.pnp.js
+.pnp.cjs
+
+# ============================================================
+# Build outputs
+# ============================================================
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+coverage/
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
+
+# ============================================================
+# Environment variables / Secrets
+# ============================================================
+.env
+.env.*
+!.env.example
+!.env.template
+
+*.pem
+*.key
+*.crt
+
+# ============================================================
+# Logs
+# ============================================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ============================================================
+# Package manager caches
+# ============================================================
+.npm/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnpm-store/
+
+# ============================================================
+# Testing
+# ============================================================
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# ============================================================
+# NestJS
+# ============================================================
+dist/
+
+# ============================================================
+# React / Next.js
+# ============================================================
+.next/
+out/
+
+# Vite
+.vite/
+
+# ============================================================
+# Docker
+# ============================================================
+docker-data/
+.docker/
+*.pid
+
+# Local Docker volumes / persistent data
+volumes/
+data/
+
+# ============================================================
+# IDE / Editors
+# ============================================================
+
+# VS Code
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.example.json
+
+# JetBrains
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Vim
+*.swp
+*.swo
+*~
+
+# ============================================================
+# Operating systems
+# ============================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.directory
+.Trash-*
+
+# ============================================================
+# Temporary files
+# ============================================================
+tmp/
+temp/
+.tmp/
+.cache/
+.cache-loader/
+
+*.tmp
+*.temp
+
+# ============================================================
+# Runtime
+# ============================================================
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ============================================================
+# Database / Local storage
+# ============================================================
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+# ============================================================
+# Prisma
+# ============================================================
+# Keep schema and migrations in Git
+# prisma/schema.prisma
+# prisma/migrations/
+
+# Ignore generated Prisma output if configured locally
+prisma/generated/
+
+# ============================================================
+# Turbo / Nx / Monorepo
+# ============================================================
+.turbo/
+.nx/
+.angular/
+
+# ============================================================
+# ESLint / Prettier caches
+# ============================================================
+.eslintcache
+.prettier-cache
+
+# ============================================================
+# Misc
+# ============================================================
+*.bak
+*.old
+*.orig
+
+# Local certificates / credentials
+credentials/
+secrets/
+
+# Local uploads / generated files
+uploads/
+storage/
+
+# ============================================================
+# NetBeans
+# ============================================================
+nbproject/private/
+nbbuild/
+nbdist/
+nbactions.xml
+nb-configuration.xml
+.nb-gradle/
