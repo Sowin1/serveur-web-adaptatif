@@ -4,7 +4,15 @@
   "scripts": {
     "dev:backend": "pnpm --filter backend start:dev",
     "dev:frontend": "pnpm --filter frontend dev",
+    "format": "prettier --write backend frontend",
+    "format:check": "prettier --check backend frontend",
+    "lint": "pnpm -r --if-present lint",
+    "lint:fix": "pnpm -r --if-present lint:fix",
+    "typecheck": "pnpm -r --if-present typecheck",
     "build": "pnpm -r build",
-    "test": "pnpm -r test"
+    "test": "pnpm -r --if-present test"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.9"
   }
 }
