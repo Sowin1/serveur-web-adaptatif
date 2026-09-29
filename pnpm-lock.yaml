@@ -164,7 +164,11 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      prettier:
+        specifier: ^3.9.9
+        version: 3.9.9
 
   backend:
     dependencies:
@@ -226,9 +230,6 @@ importers:
       oxlint-tsgolint:
         specifier: ^7.0.2001
         version: 7.0.2003
-      prettier:
-        specifier: ^3.4.2
-        version: 3.9.9
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
