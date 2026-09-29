@@ -16,6 +16,25 @@ export class BatteryService {
     this.baseUrl = this.configService.get<string>('ENODE_URL')!;
   }
 
+  /**
+   * Function that verify if the token has expired
+   * @private
+   */
+  private async verifyToken(): Promise<void> {
+    const time: number = Date.now();
+    if (
+      this.token === null ||
+      this.tokenExpiration === null ||
+      this.tokenExpiration + 3500 * 1000 <= time
+    ) {
+      await this.getEnodeToken();
+    }
+  }
+
+  /**
+   * Set a new token for ENODE api
+   * @private
+   */
   private async getEnodeToken(): Promise<void> {
     const enode_secret: string | undefined = this.configService.get<string>(
       'ENODE_CLIENT_SECRET',
@@ -59,16 +78,32 @@ export class BatteryService {
     }
   }
 
+  /**
+   * Return the list id of available battery
+   */
+  async getBatteryList(): Promise<any> {
+    try {
+      await this.verifyToken();
+      const res = await firstValueFrom(
+        this.httpService.get(`${this.baseUrl}/batteries`, {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        }),
+      );
+      return res.data;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  /**
+   * Private method to retrieve all battery information in JSON format (from enode)
+   * @param idBattery the id of the desired battery
+   */
   async getBatteryInformation(idBattery: string): Promise<any> {
     try {
-      const time: number = Date.now();
-      if (
-        this.token === null ||
-        this.tokenExpiration === null ||
-        this.tokenExpiration + 3500 * 1000 <= time
-      ) {
-        await this.getEnodeToken();
-      }
+      await this.verifyToken();
       const res: AxiosResponse<any, any, {}, any> = await firstValueFrom(
         this.httpService.get(`${this.baseUrl}/batteries/${idBattery}`, {
           headers: { Authorization: `Bearer ${this.token}` },
@@ -86,6 +121,10 @@ export class BatteryService {
     }
   }
 
+  /**
+   * Return the percentage of the specified battery
+   * @param idBattery the id of desired battery
+   */
   async getBatteryPercentage(idBattery: string): Promise<number> {
     const batteryData = await this.getBatteryInformation(idBattery);
     if (!batteryData) {
@@ -94,5 +133,19 @@ export class BatteryService {
       );
     }
     return batteryData.chargeState.batteryLevel;
+  }
+
+  /**
+   * Return the state "CHARGING"/"DISCHARGING" of the battery
+   * @param idBattery the id of desired battery
+   */
+  async getBatteryState(idBattery: string): Promise<number> {
+    const batteryData = await this.getBatteryInformation(idBattery);
+    if (!batteryData) {
+      throw new ServiceUnavailableException(
+        'Cannot retrieve battery information',
+      );
+    }
+    return batteryData.chargeState.status;
   }
 }
