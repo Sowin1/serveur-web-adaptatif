@@ -91,7 +91,13 @@ export class BatteryService {
           },
         }),
       );
-      return res.data;
+      const batterySummaries = res.data.data.map((battery: any) => ({
+        id: battery.id,
+        brand: battery.information.brand,
+        model: battery.information.model,
+        batteryCapacity: battery.chargeState.batteryCapacity,
+      }));
+      return batterySummaries;
     } catch (e) {
       throw e;
     }
