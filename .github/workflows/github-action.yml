@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  code-verification:
+    name: Code verification
+    runs-on: self-hosted
+
+    container:
+      image: node:24-alpine
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm & install
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+          pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Lint verification
+        run: pnpm run lint
+
+      - name: Format check
+        run: pnpm run format:check
+
+      - name: Type check
+        run: pnpm run typecheck
+
+  unit-test:
+    name: Unit & E2E tests
+
+    needs: code-verification
+    runs-on: self-hosted
+
+    container:
+      image: node:24-alpine
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm & install
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+          pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Unit test
+        run: pnpm run test
+
+      - name: End 2 End test
+        run: pnpm run test:e2e
