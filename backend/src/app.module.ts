@@ -4,6 +4,7 @@ import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { ConfigModule } from '@nestjs/config';
 import { BatteryModule } from './battery/battery.module.js';
+import { AuthModule } from './auth/auth.module.js';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { BatteryModule } from './battery/battery.module.js';
     }),
     HttpModule,
     BatteryModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
