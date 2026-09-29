@@ -1,11 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { AxiosResponse } from 'axios';
 
 @Injectable()
 export class BatteryService {
   private readonly baseUrl: string;
+  private token: string | null = null;
+  private tokenExpiration: number | null = null;
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
@@ -13,16 +16,66 @@ export class BatteryService {
     this.baseUrl = this.configService.get<string>('ENODE_URL')!;
   }
 
-  async getBatteryInformation(idBattery: string): Promise<any> {
-    const token = this.configService.get<string>('ENODE_ACCES_TOKEN')!;
+  private async getEnodeToken(): Promise<void> {
+    const enode_secret: string | undefined = this.configService.get<string>(
+      'ENODE_CLIENT_SECRET',
+    );
+    const enode_token_url: string | undefined =
+      this.configService.get<string>('ENODE_TOKEN_URL');
+    const enode_client_id: string | undefined =
+      this.configService.get<string>('ENODE_CLIENT_ID');
+
+    if (!enode_secret) {
+      throw new Error('Missing enode_secret');
+    }
+    if (!enode_token_url) {
+      throw new Error('Missing enode_token_url');
+    }
+    if (!enode_client_id) {
+      throw new Error('Missing enode_client_id');
+    }
+
     try {
-      const response = await firstValueFrom(
+      const credentials: string = Buffer.from(
+        `${enode_client_id}:${enode_secret}`,
+      ).toString('base64');
+      const res = await firstValueFrom(
+        this.httpService.post(
+          enode_token_url,
+          'grant_type=client_credentials',
+          {
+            headers: {
+              Authorization: `Basic ${credentials}`,
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+          },
+        ),
+      );
+      this.tokenExpiration = Date.now();
+      this.token = res.data.access_token;
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
+  }
+
+  async getBatteryInformation(idBattery: string): Promise<any> {
+    try {
+      const time: number = Date.now();
+      if (
+        this.token === null ||
+        this.tokenExpiration === null ||
+        this.tokenExpiration + 3500 * 1000 <= time
+      ) {
+        await this.getEnodeToken();
+      }
+      const res: AxiosResponse<any, any, {}, any> = await firstValueFrom(
         this.httpService.get(`${this.baseUrl}/batteries/${idBattery}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${this.token}` },
         }),
       );
 
-      return response.data;
+      return res.data;
     } catch (error: any) {
       console.error('URL:', `${this.baseUrl}/batteries/${idBattery}`);
       console.error('STATUS:', error.response?.status);
@@ -31,5 +84,15 @@ export class BatteryService {
 
       throw error;
     }
+  }
+
+  async getBatteryPercentage(idBattery: string): Promise<number> {
+    const batteryData = await this.getBatteryInformation(idBattery);
+    if (!batteryData) {
+      throw new ServiceUnavailableException(
+        'Cannot retrieve battery information',
+      );
+    }
+    return batteryData.chargeState.batteryLevel;
   }
 }

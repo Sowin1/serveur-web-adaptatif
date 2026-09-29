@@ -6,7 +6,11 @@ export class BatteryController {
   constructor(private readonly batteryService: BatteryService) {}
 
   @Get(':id')
-  getHello(@Param('id') id: string): Promise<any> {
+  getBatteryInformation(@Param('id') id: string): Promise<any> {
     return this.batteryService.getBatteryInformation(id);
+  }
+  @Get(':id/percentage')
+  getBatteryPercentage(@Param('id') id: string): Promise<any> {
+    return this.batteryService.getBatteryPercentage(id);
   }
 }
