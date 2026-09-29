@@ -1,10 +1,14 @@
-name: CI
+name: CI Backend
 
 on:
   pull_request:
     branches:
       - main
       - dev
+    paths:
+      - 'backend/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
 
 jobs:
   code-verification:
@@ -25,17 +29,16 @@ jobs:
           pnpm install --frozen-lockfile --prefer-offline
 
       - name: Lint verification
-        run: pnpm run lint
+        run: pnpm --filter backend lint
 
       - name: Format check
-        run: pnpm run format:check
+        run: pnpm --filter backend format:check
 
       - name: Type check
-        run: pnpm run typecheck
+        run: pnpm --filter backend typecheck
 
   unit-test:
     name: Unit & E2E tests
-
     needs: code-verification
     runs-on: self-hosted
 
@@ -49,11 +52,11 @@ jobs:
       - name: Setup pnpm & install
         run: |
           corepack enable
-          corepack prepare pnpm@latest --activate
+          corepack prepare pnpm@12.6.0 --activate
           pnpm install --frozen-lockfile --prefer-offline
 
       - name: Unit test
-        run: pnpm run test
+        run: pnpm --filter backend test
 
       - name: End 2 End test
-        run: pnpm run test:e2e
+        run: pnpm --filter backend test:e2e
