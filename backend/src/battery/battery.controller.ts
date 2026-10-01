@@ -12,6 +12,7 @@ export class BatteryController {
   getBatteryList(): Promise<any> {
     return this.batteryService.getBatteryList();
   }
+
   @UseGuards(AuthGuard('battery'))
   @Get(':id')
   getBatteryInformation(@Param('id') id: string): Promise<any> {
@@ -23,6 +24,7 @@ export class BatteryController {
   getBatteryPercentage(@Param('id') id: string): Promise<any> {
     return this.batteryService.getBatteryPercentage(id);
   }
+
   @UseGuards(AuthGuard('battery'))
   @Get(':id/state')
   getBatteryState(@Param('id') id: string): Promise<any> {

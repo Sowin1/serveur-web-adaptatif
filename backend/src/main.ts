@@ -39,6 +39,18 @@ async function bootstrap() {
     .setTitle('Battery api documentation')
     .setVersion('1.0')
     .setDescription('Take a look to docs/auth for more information about JWT')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        in: 'header',
+        name: 'Authorization',
+        description: 'Paste access token without Bearer prefix',
+      },
+      'bearerBattery',
+    )
+    .addSecurityRequirements('bearerBattery')
     .build();
   const optionBattery: SwaggerCustomOptions = { ui: true, raw: ['json'] };
   const batteryDocumentFactory = () =>
