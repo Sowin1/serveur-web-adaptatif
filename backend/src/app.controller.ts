@@ -13,13 +13,4 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
-  @Post('battery/login')
-  async authenticate(@Request() req: any) {
-    try {
-      await this.batteryAuthService.validate(req.body.password);
-      return this.batteryAuthService.authenticate();
-    } catch (e) {
-      throw e;
-    }
-  }
 }

@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { BatteryAuthStrategy } from './battery-auth.strategy.js';
+import { BatteryAuthController } from './battery-auth.controller.js';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { BatteryAuthStrategy } from './battery-auth.strategy.js';
     }),
   ],
   providers: [BatteryAuthService, BatteryAuthStrategy],
+  controllers: [BatteryAuthController],
   exports: [BatteryAuthService],
 })
 export class BatteryAuthModule {}
