@@ -5,11 +5,14 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { AppModule } from '../../src/app.module.js';
+import { expect } from 'vitest';
 
 describe('Battery', () => {
   let app: NestFastifyApplication;
   let token: string = '';
   let password: string = '';
+  let batteryList: any = '';
+  let currentBatteryState: string = '';
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -69,6 +72,7 @@ describe('Battery', () => {
       .then((result) => {
         expect(result.statusCode).toEqual(401);
         expect(result.statusMessage).toEqual('Unauthorized');
+        batteryList = result.json();
       });
   });
 
@@ -84,6 +88,27 @@ describe('Battery', () => {
         expect(result.statusMessage).toEqual('OK');
       });
   }, 15_000);
+
+  it(`Battery state, should return the state of the battery`, () => {
+    const batteryId = batteryList[0].id;
+    return app
+      .inject({
+        method: 'GET',
+        url: `/battery/${batteryId}`,
+      })
+      .then((result) => {
+        expect(result.statusCode).toEqual(200);
+        currentBatteryState = result.body;
+      });
+  });
+
+  // it(`Battery state change`, () => {
+  //   const batteryId = batteryList[0].id;
+  //   return app.inject({
+  //     method: 'POST',
+  //     url: `/battery/${batteryId}/update-state`,
+  //   });
+  // });
 
   afterAll(async () => {
     await app.close();

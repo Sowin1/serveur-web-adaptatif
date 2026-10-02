@@ -1,4 +1,8 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
@@ -145,7 +149,7 @@ export class BatteryService {
    * Return the state "CHARGING"/"DISCHARGING" of the battery
    * @param idBattery the id of desired battery
    */
-  async getBatteryState(idBattery: string): Promise<number> {
+  async getBatteryState(idBattery: string): Promise<string> {
     const batteryData = await this.getBatteryInformation(idBattery);
     if (!batteryData) {
       throw new ServiceUnavailableException(
@@ -153,5 +157,43 @@ export class BatteryService {
       );
     }
     return batteryData.chargeState.status;
+  }
+
+  async changeBatteryState(idBattery: string, state: number): Promise<boolean> {
+    let newState: string | null = null;
+    switch (state) {
+      case 0:
+        newState = 'CHARGING';
+        break;
+      case 1:
+        newState = 'DISCHARGING';
+        break;
+      case 2:
+        newState = 'IDLE';
+        break;
+      case 3:
+        newState = 'FAULT';
+        break;
+      case 4:
+        newState = 'UNKNOWN';
+        break;
+      default:
+        throw new BadRequestException('State must be between 0 and 4');
+    }
+
+    try {
+      await this.verifyToken();
+      await firstValueFrom(
+        this.httpService.get(`${this.baseUrl}/batteries/${idBattery}`, {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+          data: { operationMode: newState },
+        }),
+      );
+      return (await this.getBatteryState(idBattery)) === newState;
+    } catch (e) {
+      throw e;
+    }
   }
 }

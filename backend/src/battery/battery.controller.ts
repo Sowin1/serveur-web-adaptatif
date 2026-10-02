@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 import { BatteryService } from './battery.service.js';
@@ -29,5 +29,14 @@ export class BatteryController {
   @Get(':id/state')
   getBatteryState(@Param('id') id: string): Promise<any> {
     return this.batteryService.getBatteryState(id);
+  }
+
+  @UseGuards(AuthGuard('battery'))
+  @Post(':id/update-state')
+  updateBatteryState(
+    @Param('id') id: string,
+    @Body('state') state: number,
+  ): Promise<any> {
+    return this.batteryService.changeBatteryState(id, state);
   }
 }
