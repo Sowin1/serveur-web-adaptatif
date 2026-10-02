@@ -11,7 +11,7 @@ inputs:
 
   JWT_SECRET:
     description: 'JWT_SECRET'
-    required: true  
+    required: true
 
   AUTH_BATTERY:
     description: 'AUTH_BATTERY'
@@ -38,12 +38,20 @@ runs:
   steps:
     - name: Initialize env file
       shell: sh
-      run: |
-        echo "ENODE_URL=${{ inputs.ENODE_URL }}" >> .env
-        echo "ENODE_TOKEN_URL=${{ inputs.ENODE_TOKEN_URL }}" >> .env
-        echo "ENODE_CLIENT_ID=${{ inputs.ENODE_CLIENT_ID }}" >> .env
-        echo "AUTH_BATTERY=${{ inputs.AUTH_BATTERY }}" >> .env
-        echo "AUTH_BATTERY_PASS=${{ inputs.AUTH_BATTERY_PASS }}" >> .env
-        echo "ENODE_CLIENT_SECRET=${{ inputs.ENODE_CLIENT_SECRET }}" >> .env
-        echo "JWT_SECRET=${{ inputs.JWT_SECRET }}" >> .env  
+      env:
+        ENODE_URL_VALUE: ${{ inputs.ENODE_URL }}
+        ENODE_TOKEN_URL_VALUE: ${{ inputs.ENODE_TOKEN_URL }}
+        ENODE_CLIENT_ID_VALUE: ${{ inputs.ENODE_CLIENT_ID }}
+        AUTH_BATTERY_VALUE: ${{ inputs.AUTH_BATTERY }}
+        AUTH_BATTERY_PASS_VALUE: ${{ inputs.AUTH_BATTERY_PASS }}
+        ENODE_CLIENT_SECRET_VALUE: ${{ inputs.ENODE_CLIENT_SECRET }}
+        JWT_SECRET_VALUE: ${{ inputs.JWT_SECRET }}
 
+      run: |
+        echo "ENODE_URL=$ENODE_URL_VALUE" >> .env
+        echo "ENODE_TOKEN_URL=$ENODE_TOKEN_URL_VALUE" >> .env
+        echo "ENODE_CLIENT_ID=$ENODE_CLIENT_ID_VALUE" >> .env
+        echo "AUTH_BATTERY=$AUTH_BATTERY_VALUE" >> .env
+        echo "AUTH_BATTERY_PASS=$AUTH_BATTERY_PASS_VALUE" >> .env
+        echo "ENODE_CLIENT_SECRET=$ENODE_CLIENT_SECRET_VALUE" >> .env
+        echo "JWT_SECRET=$JWT_SECRET_VALUE" >> .env
