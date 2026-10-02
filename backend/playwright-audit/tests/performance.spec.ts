@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('audit du temps de chargement', async ({ page }) => {
+test('audit of the loading time', async ({ page }) => {
   const start = Date.now();
 
   await page.goto('https://lesitedecon', {
@@ -9,7 +9,7 @@ test('audit du temps de chargement', async ({ page }) => {
 
   const loadingTime = Date.now() - start;
 
-  console.log(`Temps de chargement : ${loadingTime} ms`);
+  console.log(`Loading time : ${loadingTime} ms`);
 
   expect(loadingTime).toBeLessThan(5000);
 });

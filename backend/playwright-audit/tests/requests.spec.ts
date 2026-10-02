@@ -1,6 +1,6 @@
 import { test } from '@playwright/test';
 
-test('audit du nombre de requêtes', async ({ page }) => {
+test('audit of the number of requests', async ({ page }) => {
   const requests: string[] = [];
 
   page.on('request', (request) => {
@@ -11,7 +11,7 @@ test('audit du nombre de requêtes', async ({ page }) => {
     waitUntil: 'load',
   });
 
-  console.log(`Nombre total de requêtes : ${requests.length}`);
+  console.log(`Total number of requests : ${requests.length}`);
 
   requests.forEach((url, index) => {
     console.log(`${index + 1}. ${url}`);
