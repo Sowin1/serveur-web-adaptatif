@@ -3,18 +3,15 @@ description: 'Creating env file'
 inputs:
   AUTH_BATTERY_PASS:
       description: 'AUTH_BATTERY_PASS'
-      required: false
-      default: 'AUTH_BATTERY_PASS'
+      required: true
 
   ENODE_CLIENT_SECRET:
     description: 'ENODE_CLIENT_SECRET'
-    required: false
-    default: 'ENODE_CLIENT_SECRET'
+    required: true
 
   JWT_SECRET:
     description: 'JWT_SECRET'
-    required: false
-    default: 'JWT_SECRET'
+    required: true  
 
   AUTH_BATTERY:
     description: 'AUTH_BATTERY'
@@ -40,6 +37,7 @@ runs:
   using: "composite"
   steps:
     - name: Initialize env file
+      shell: sh
       run: |
         echo "ENODE_URL=${{ inputs.ENODE_URL }}" >> .env
         echo "ENODE_TOKEN_URL=${{ inputs.ENODE_TOKEN_URL }}" >> .env
