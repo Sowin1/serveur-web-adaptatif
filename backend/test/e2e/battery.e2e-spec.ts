@@ -90,10 +90,8 @@ describe('Battery', () => {
   }, 15_000);
 
   it(`Battery state, should return the state of the battery`, () => {
-    console.log(batteryList);
-    console.log('iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii');
-    console.log(batteryList[0]);
-    const batteryId = batteryList[0].data.id;
+    // console.log(batteryList);
+    const batteryId = batteryList[0].id;
     return app
       .inject({
         method: 'GET',
@@ -107,7 +105,7 @@ describe('Battery', () => {
 
   it(`Battery state change`, () => {
     const batteryId = batteryList[0].id;
-    const batteryState = batteryList[0].state;
+    const batteryState = batteryList[0].state; // T A changer par batterie info tout court
     return app
       .inject({
         method: 'POST',
