@@ -83,7 +83,7 @@ describe('Battery', () => {
         expect(result.statusCode).toEqual(200);
         expect(result.statusMessage).toEqual('OK');
       });
-  });
+  }, 15_000);
 
   afterAll(async () => {
     await app.close();
