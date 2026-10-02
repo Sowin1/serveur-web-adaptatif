@@ -102,13 +102,24 @@ describe('Battery', () => {
       });
   });
 
-  // it(`Battery state change`, () => {
-  //   const batteryId = batteryList[0].id;
-  //   return app.inject({
-  //     method: 'POST',
-  //     url: `/battery/${batteryId}/update-state`,
-  //   });
-  // });
+  it(`Battery state change`, () => {
+    const batteryId = batteryList[0].id;
+    const batteryState = batteryList[0].state;
+    return app
+      .inject({
+        method: 'POST',
+        url: `/battery/${batteryId}/update-state`,
+        body: {
+          state: 3,
+        },
+      })
+      .then((result) => {
+        expect(result.statusCode).toEqual(200);
+      });
+
+    // T Vérifier que le state à bien changé
+    // T REvenir à la version précedente
+  });
 
   afterAll(async () => {
     await app.close();
