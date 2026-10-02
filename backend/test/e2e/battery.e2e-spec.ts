@@ -72,7 +72,6 @@ describe('Battery', () => {
       .then((result) => {
         expect(result.statusCode).toEqual(401);
         expect(result.statusMessage).toEqual('Unauthorized');
-        batteryList = result.json();
       });
   });
 
@@ -86,11 +85,15 @@ describe('Battery', () => {
       .then((result) => {
         expect(result.statusCode).toEqual(200);
         expect(result.statusMessage).toEqual('OK');
+        batteryList = result.json();
       });
   }, 15_000);
 
   it(`Battery state, should return the state of the battery`, () => {
-    const batteryId = batteryList[0].id;
+    console.log(batteryList);
+    console.log('iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii');
+    console.log(batteryList[0]);
+    const batteryId = batteryList[0].data.id;
     return app
       .inject({
         method: 'GET',
