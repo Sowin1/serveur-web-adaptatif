@@ -20,9 +20,5 @@
     "strictPropertyInitialization": false,
     "types": ["vitest/globals", "node"]
   },
-  "exclude": [
-    "node_modules",
-    "dist",
-    "playwright-audit"
-  ]
+  "exclude": ["node_modules", "dist", "playwright-audit"]
 }
