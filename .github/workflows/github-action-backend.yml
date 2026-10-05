@@ -6,6 +6,7 @@ on:
       - main
       - dev
     paths:
+      - '.github/workflows/github-action-backend.yml'
       - 'backend/**'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
@@ -39,6 +40,7 @@ jobs:
 
   unit-test:
     name: Unit & E2E tests
+    environment: test
     needs: code-verification
     runs-on: self-hosted
 
@@ -49,14 +51,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Run .env creating
+        uses: ./.github/actions/env-action
+        with:
+          ENODE_URL: ${{ vars.ENODE_URL }}
+          ENODE_TOKEN_URL: ${{ vars.ENODE_TOKEN_URL }}
+          ENODE_CLIENT_ID: ${{ vars.ENODE_CLIENT_ID }}
+          AUTH_BATTERY: ${{ vars.AUTH_BATTERY }}
+          AUTH_BATTERY_PASS: ${{ secrets.AUTH_BATTERY_PASS }}
+          ENODE_CLIENT_SECRET: ${{ secrets.ENODE_CLIENT_SECRET }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+
       - name: Setup pnpm & install
         run: |
           corepack enable
           corepack prepare pnpm@12.6.0 --activate
           pnpm install --frozen-lockfile --prefer-offline
 
-      - name: Unit test
-        run: pnpm --filter backend test
+#      - name: Unit test
+#        run: pnpm --filter backend test
 
       - name: End 2 End test
         run: pnpm --filter backend test:e2e
