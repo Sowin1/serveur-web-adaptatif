@@ -1,6 +1,6 @@
 allowBuilds:
   '@scarf/scarf': false
-  bcrypt: false
+  argon2: false
   unrs-resolver: true
 
 packages:
