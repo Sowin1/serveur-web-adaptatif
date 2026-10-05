@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { AppController } from './app.controller.js';
 import { AuthModule } from './auth/auth.module.js';
@@ -14,6 +13,7 @@ import { BatteryAuthModule } from './battery-auth/battery-auth.module.js';
       isGlobal: true,
       envFilePath: '../.env',
     }),
+    AuthModule,
     HttpModule,
     BatteryModule,
     BatteryAuthModule,
