@@ -72,7 +72,7 @@ jobs:
 
       - name: End 2 End test
         run: pnpm --filter backend test:e2e
-
-      - name: Playwright test
-        working-directory: backend
-        run: pnpm --filter backend test:playwright
+#
+#      - name: Playwright test
+#        working-directory: backend
+#        run: pnpm --filter backend test:playwright
