@@ -13,12 +13,11 @@ import { BatteryModule } from './battery/battery.module.js';
 import { BatteryAuthModule } from './battery-auth/battery-auth.module.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  app.enableCors();
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
   );
+  app.enableCors();
 
   /**
    * Swagger auth

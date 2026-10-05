@@ -8,9 +8,24 @@ export const MOCK_SITES: Site[] = [
     active: true,
     services: [
       { id: 'accueil', name: 'Home Page', route: '/', active: true },
-      { id: 'energie', name: 'Energy Status', route: '/api/energie', active: true },
-      { id: 'urgence', name: 'Emergency Information', route: '/urgence', active: true },
-      { id: 'galerie', name: 'Photo Gallery', route: '/galerie', active: false },
+      {
+        id: 'energie',
+        name: 'Energy Status',
+        route: '/api/energie',
+        active: true,
+      },
+      {
+        id: 'urgence',
+        name: 'Emergency Information',
+        route: '/urgence',
+        active: true,
+      },
+      {
+        id: 'galerie',
+        name: 'Photo Gallery',
+        route: '/galerie',
+        active: false,
+      },
     ],
     features: [
       { id: 'images', name: 'Images', enabled: true },
@@ -25,7 +40,12 @@ export const MOCK_SITES: Site[] = [
     active: true,
     services: [
       { id: 'articles', name: 'Articles', route: '/articles', active: true },
-      { id: 'commentaires', name: 'Commentaires', route: '/api/commentaires', active: true },
+      {
+        id: 'commentaires',
+        name: 'Commentaires',
+        route: '/api/commentaires',
+        active: true,
+      },
     ],
     features: [
       { id: 'images', name: 'Images', enabled: false },
@@ -37,7 +57,9 @@ export const MOCK_SITES: Site[] = [
     id: 'carto',
     name: 'Cartography',
     active: false,
-    services: [{ id: 'carte', name: 'Interactive Map', route: '/carte', active: false }],
+    services: [
+      { id: 'carte', name: 'Interactive Map', route: '/carte', active: false },
+    ],
     features: [{ id: 'itineraire', name: 'Route Calculation', enabled: false }],
   },
 ];

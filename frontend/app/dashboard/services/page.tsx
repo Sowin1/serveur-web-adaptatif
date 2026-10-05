@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { fetchSites } from './_lib/api';
 import { MOCK_SITES } from './_lib/mock';
 import type { Site } from './_lib/types';
@@ -9,25 +9,31 @@ const REFRESH_MS = 15_000;
 
 export default function ServicesActifsPage() {
   const [sites, setSites] = useState<Site[] | null>(null);
-  const [simulated, setSimulated] = useState(false);
-
-  const load = useCallback(async () => {
-    try {
-      setSites(await fetchSites());
-      setSimulated(false);
-    } catch {
-      setSites(MOCK_SITES);
-      setSimulated(true);
-    }
-  }, []);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    void load();
+    let cancelled = false;
+
+    const load = () => {
+      fetchSites()
+        .then((data) => {
+          if (!cancelled) setSites(data);
+        })
+        .catch(() => {
+          if (!cancelled) setSites(MOCK_SITES);
+        });
+    };
+
+    load();
     const id = window.setInterval(() => {
-      if (document.visibilityState === 'visible') void load();
+      if (document.visibilityState === 'visible') load();
     }, REFRESH_MS);
-    return () => window.clearInterval(id);
-  }, [load]);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [refreshKey]);
 
   return (
     <main className="min-h-screen bg-white text-gray-900">
@@ -36,15 +42,19 @@ export default function ServicesActifsPage() {
           <h1 className="text-2xl font-bold">Active Services</h1>
           <button
             type="button"
-            onClick={() => void load()}
+            onClick={() => setRefreshKey((k) => k + 1)}
             className="rounded border border-gray-300 px-3 py-1 text-sm hover:bg-gray-100"
           >
             Refresh
           </button>
         </div>
-        
+
         {!sites && <p className="mt-6 text-gray-600">Loading...</p>}
-        {sites?.length === 0 && <p className="mt-6 text-gray-600">No sites available at the moment.</p>}
+        {sites?.length === 0 && (
+          <p className="mt-6 text-gray-600">
+            No sites available at the moment.
+          </p>
+        )}
 
         {sites?.map((site) => (
           <SiteBlock key={site.id} site={site} />
@@ -61,7 +71,11 @@ function SiteBlock({ site }: { site: Site }) {
     <section className="mt-6 rounded border border-gray-200 p-4">
       <div className="flex items-baseline justify-between">
         <h2 className="text-lg font-semibold">{site.name}</h2>
-        <span className={site.active ? 'text-sm text-green-800' : 'text-sm text-gray-400'}>
+        <span
+          className={
+            site.active ? 'text-sm text-green-800' : 'text-sm text-gray-400'
+          }
+        >
           {site.active ? 'Active' : 'Inactive'}
         </span>
       </div>
@@ -78,9 +92,14 @@ function SiteBlock({ site }: { site: Site }) {
           ) : (
             <ul className="mt-1 text-sm">
               {actifs.map((svc) => (
-                <li key={svc.id} className="flex justify-between border-b border-gray-100 py-1.5">
+                <li
+                  key={svc.id}
+                  className="flex justify-between border-b border-gray-100 py-1.5"
+                >
                   <span>{svc.name}</span>
-                  {svc.route && <span className="text-gray-500">{svc.route}</span>}
+                  {svc.route && (
+                    <span className="text-gray-500">{svc.route}</span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -88,12 +107,19 @@ function SiteBlock({ site }: { site: Site }) {
 
           {site.features.length > 0 && (
             <>
-              <h3 className="mt-4 text-sm font-semibold text-gray-700">Features</h3>
+              <h3 className="mt-4 text-sm font-semibold text-gray-700">
+                Features
+              </h3>
               <ul className="mt-1 text-sm">
                 {site.features.map((f) => (
-                  <li key={f.id} className="flex justify-between border-b border-gray-100 py-1.5">
+                  <li
+                    key={f.id}
+                    className="flex justify-between border-b border-gray-100 py-1.5"
+                  >
                     <span>{f.name}</span>
-                    <span className={f.enabled ? 'text-green-800' : 'text-red-600'}>
+                    <span
+                      className={f.enabled ? 'text-green-800' : 'text-red-600'}
+                    >
                       {f.enabled ? 'Enabled' : 'Disabled'}
                     </span>
                   </li>
