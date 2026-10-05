@@ -1,11 +1,33 @@
 ## Initialisation projet :
 
-Activer `pnpm` 
+# 1. Login + récupération automatique du JWT
+TOKEN=$(curl -s -X POST http://localhost:3000/battery/login \
+-H "Content-Type: application/json" \
+-d '{"password":"iutbordeaux"}' \
+| jq -r '.access_token')
 
-```corepack enable```
-```corepack prepare pnpm@latest --activate```
+# 2. Vérifier le token
+echo $TOKEN
 
-Puis toutes les commandes seront pnpm !(pas npm)
+# 3. Liste des batteries
+curl -s \
+-H "Authorization: Bearer $TOKEN" \
+http://localhost:3000/battery/list | jq
+
+# 4. Informations d'une batterie
+`curl -s \
+-H "Authorization: Bearer $TOKEN" \
+http://localhost:3000/battery/ee9dfd86-efc2-4362-8948-6ab381366d54 | jq`
+
+# 5. Pourcentage
+curl -s \
+-H "Authorization: Bearer $TOKEN" \
+http://localhost:3000/battery/ee9dfd86-efc2-4362-8948-6ab381366d54/percentage | jq
+
+# 6. État
+curl -s \
+-H "Authorization: Bearer $TOKEN" \
+http://localhost:3000/battery/ee9dfd86-efc2-4362-8948-6ab381366d54/state | jq
 
 
 ## Projet 2 : 
