@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test('audit of the loading time', async ({ page }) => {
   const start = Date.now();
 
-  await page.goto('https://lesitedecon', {
+  await page.goto('https://lesite', {
     waitUntil: 'load',
   });
 

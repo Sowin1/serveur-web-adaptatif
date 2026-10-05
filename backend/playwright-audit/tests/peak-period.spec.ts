@@ -10,7 +10,7 @@ test('verification of prepared content prior to a period of high consumption', a
   ];
 
   for (const content of contents) {
-    const response = await page.goto(`https://lesitedecon${content}`, {
+    const response = await page.goto(`https://lesite${content}`, {
       waitUntil: 'load',
     });
 
