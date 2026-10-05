@@ -105,7 +105,8 @@ describe('Battery', () => {
 
   it(`Battery state change`, () => {
     const batteryId = batteryList[0].id;
-    const batteryState = batteryList[0].state; // T A changer par batterie info tout court
+    const batteryState = batteryList[0]; // T A changer par batterie info tout court
+    console.log('batteryState', batteryState);
     return app
       .inject({
         method: 'POST',
