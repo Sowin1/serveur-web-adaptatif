@@ -7,7 +7,7 @@ test('audit of the number of requests', async ({ page }) => {
     requests.push(request.url());
   });
 
-  await page.goto('https://lesite', {
+  await page.goto('https://google.com', {
     waitUntil: 'load',
   });
 

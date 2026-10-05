@@ -11,7 +11,7 @@ test('simulation of a period of high consumption', async () => {
 
       const start = Date.now();
 
-      const response = await page.goto('https://lesite', {
+      const response = await page.goto('https://google.com', {
         waitUntil: 'load',
       });
 
