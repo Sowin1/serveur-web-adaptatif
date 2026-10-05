@@ -95,13 +95,13 @@ export class BatteryService {
           },
         }),
       );
-      const batterySummaries = res.data.data.map((battery: any) => ({
+
+      return res.data.data.map((battery: any) => ({
         id: battery.id,
         brand: battery.information.brand,
         model: battery.information.model,
         batteryCapacity: battery.chargeState.batteryCapacity,
       }));
-      return batterySummaries;
     } catch (e) {
       throw e;
     }
@@ -119,7 +119,6 @@ export class BatteryService {
           headers: { Authorization: `Bearer ${this.token}` },
         }),
       );
-
       return res.data;
     } catch (error: any) {
       console.error('URL:', `${this.baseUrl}/batteries/${idBattery}`);
@@ -159,41 +158,5 @@ export class BatteryService {
     return batteryData.chargeState.status;
   }
 
-  async changeBatteryState(idBattery: string, state: number): Promise<boolean> {
-    let newState: string | null = null;
-    switch (state) {
-      case 0:
-        newState = 'CHARGING';
-        break;
-      case 1:
-        newState = 'DISCHARGING';
-        break;
-      case 2:
-        newState = 'IDLE';
-        break;
-      case 3:
-        newState = 'FAULT';
-        break;
-      case 4:
-        newState = 'UNKNOWN';
-        break;
-      default:
-        throw new BadRequestException('State must be between 0 and 4');
-    }
-
-    try {
-      await this.verifyToken();
-      await firstValueFrom(
-        this.httpService.get(`${this.baseUrl}/batteries/${idBattery}`, {
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
-          data: { operationMode: newState },
-        }),
-      );
-      return (await this.getBatteryState(idBattery)) === newState;
-    } catch (e) {
-      throw e;
-    }
-  }
+  async changeBatteryLevel(idBattery: string, level: number): Promise<void> {}
 }

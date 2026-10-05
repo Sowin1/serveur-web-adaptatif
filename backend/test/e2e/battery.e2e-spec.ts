@@ -90,37 +90,19 @@ describe('Battery', () => {
   }, 15_000);
 
   it(`Battery state, should return the state of the battery`, () => {
-    // console.log(batteryList);
     const batteryId = batteryList[0].id;
     return app
       .inject({
         method: 'GET',
         url: `/battery/${batteryId}`,
-      })
-      .then((result) => {
-        expect(result.statusCode).toEqual(200);
-        currentBatteryState = result.body;
-      });
-  });
-
-  it(`Battery state change`, () => {
-    const batteryId = batteryList[0].id;
-    const batteryState = batteryList[0]; // T A changer par batterie info tout court
-    console.log('batteryState', batteryState);
-    return app
-      .inject({
-        method: 'POST',
-        url: `/battery/${batteryId}/update-state`,
-        body: {
-          state: 3,
+        headers: {
+          authorization: `Bearer ${token}`,
         },
       })
       .then((result) => {
         expect(result.statusCode).toEqual(200);
+        currentBatteryState = result.json().chargeState.status;
       });
-
-    // T Vérifier que le state à bien changé
-    // T REvenir à la version précedente
   });
 
   afterAll(async () => {

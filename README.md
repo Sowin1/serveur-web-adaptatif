@@ -15,9 +15,9 @@ curl -s \
 http://localhost:3000/battery/list | jq
 
 # 4. Informations d'une batterie
-curl -s \
+`curl -s \
 -H "Authorization: Bearer $TOKEN" \
-http://localhost:3000/battery/ee9dfd86-efc2-4362-8948-6ab381366d54 | jq
+http://localhost:3000/battery/ee9dfd86-efc2-4362-8948-6ab381366d54 | jq`
 
 # 5. Pourcentage
 curl -s \

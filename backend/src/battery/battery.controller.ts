@@ -31,12 +31,12 @@ export class BatteryController {
     return this.batteryService.getBatteryState(id);
   }
 
-  @UseGuards(AuthGuard('battery'))
-  @Post(':id/update-state')
-  updateBatteryState(
-    @Param('id') id: string,
-    @Body('state') state: number,
-  ): Promise<any> {
-    return this.batteryService.changeBatteryState(id, state);
-  }
+  // @UseGuards(AuthGuard('battery'))
+  // @Post(':id/update-level')
+  // updateBatteryState(
+  //   @Param('id') id: string,
+  //   @Body('battery-level') state: number,
+  // ): Promise<any> {
+  //   return this.batteryService.changeBatteryLevel(id, level);
+  // }
 }
