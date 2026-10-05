@@ -1,0 +1,57 @@
+name: 'Env file'
+description: 'Creating env file'
+inputs:
+  AUTH_BATTERY_PASS:
+      description: 'AUTH_BATTERY_PASS'
+      required: true
+
+  ENODE_CLIENT_SECRET:
+    description: 'ENODE_CLIENT_SECRET'
+    required: true
+
+  JWT_SECRET:
+    description: 'JWT_SECRET'
+    required: true
+
+  AUTH_BATTERY:
+    description: 'AUTH_BATTERY'
+    required: false
+    default: 'AUTH_BATTERY'
+
+  ENODE_CLIENT_ID:
+    description: 'ENODE_CLIENT_ID'
+    required: false
+    default: 'ENODE_CLIENT_ID'
+
+  ENODE_TOKEN_URL:
+    description: 'ENODE_TOKEN_URL'
+    required: false
+    default: 'ENODE_TOKEN_URL'
+
+  ENODE_URL:
+    description: 'ENODE_TOKEN_URL'
+    required: false
+    default: 'ENODE_URL'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Initialize env file
+      shell: sh
+      env:
+        ENODE_URL_VALUE: ${{ inputs.ENODE_URL }}
+        ENODE_TOKEN_URL_VALUE: ${{ inputs.ENODE_TOKEN_URL }}
+        ENODE_CLIENT_ID_VALUE: ${{ inputs.ENODE_CLIENT_ID }}
+        AUTH_BATTERY_VALUE: ${{ inputs.AUTH_BATTERY }}
+        AUTH_BATTERY_PASS_VALUE: ${{ inputs.AUTH_BATTERY_PASS }}
+        ENODE_CLIENT_SECRET_VALUE: ${{ inputs.ENODE_CLIENT_SECRET }}
+        JWT_SECRET_VALUE: ${{ inputs.JWT_SECRET }}
+
+      run: |
+        echo "ENODE_URL=$ENODE_URL_VALUE" >> .env
+        echo "ENODE_TOKEN_URL=$ENODE_TOKEN_URL_VALUE" >> .env
+        echo "ENODE_CLIENT_ID=$ENODE_CLIENT_ID_VALUE" >> .env
+        echo "AUTH_BATTERY=$AUTH_BATTERY_VALUE" >> .env
+        echo "AUTH_BATTERY_PASS=$AUTH_BATTERY_PASS_VALUE" >> .env
+        echo "ENODE_CLIENT_SECRET=$ENODE_CLIENT_SECRET_VALUE" >> .env
+        echo "JWT_SECRET=$JWT_SECRET_VALUE" >> .env
