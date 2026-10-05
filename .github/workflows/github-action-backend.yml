@@ -74,4 +74,4 @@ jobs:
 
       - name: Playwright test
         working-directory: backend
-        run: pnpm exec playwright install chromium
+        run: pnpm --filter backend test:playwright
