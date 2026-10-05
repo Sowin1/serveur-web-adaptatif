@@ -59,7 +59,9 @@ describe('Sites status', () => {
   it(`Sites status, an offline site should have no active service`, () => {
     const offlineSites = sites.filter((site) => !site.active);
     for (const site of offlineSites) {
-      const activeServices = site.services.filter((service: any) => service.active);
+      const activeServices = site.services.filter(
+        (service: any) => service.active,
+      );
       expect(activeServices).toHaveLength(0);
     }
   });
@@ -67,7 +69,9 @@ describe('Sites status', () => {
   it(`Sites status, an online site should have at least one active service`, () => {
     const onlineSites = sites.filter((site) => site.active);
     for (const site of onlineSites) {
-      const activeServices = site.services.filter((service: any) => service.active);
+      const activeServices = site.services.filter(
+        (service: any) => service.active,
+      );
       expect(activeServices.length).toBeGreaterThan(0);
     }
   });
