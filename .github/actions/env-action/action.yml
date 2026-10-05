@@ -2,8 +2,8 @@ name: 'Env file'
 description: 'Creating env file'
 inputs:
   AUTH_BATTERY_PASS:
-      description: 'AUTH_BATTERY_PASS'
-      required: true
+    description: 'AUTH_BATTERY_PASS'
+    required: true
 
   ENODE_CLIENT_SECRET:
     description: 'ENODE_CLIENT_SECRET'

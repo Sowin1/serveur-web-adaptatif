@@ -6,7 +6,6 @@ on:
       - main
       - dev
     paths:
-      - '.github/workflows/github-action-backend.yml'
       - 'backend/**'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
@@ -39,7 +38,8 @@ jobs:
         run: pnpm --filter backend typecheck
 
   unit-test:
-    name: Unit & E2E tests & Playwright
+    name: Unit & E2E tests
+    environment: test
     needs: code-verification
     runs-on: self-hosted
 
@@ -60,14 +60,6 @@ jobs:
           AUTH_BATTERY_PASS: ${{ secrets.AUTH_BATTERY_PASS }}
           ENODE_CLIENT_SECRET: ${{ secrets.ENODE_CLIENT_SECRET }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          
-      - name: Check env
-        run: |
-          test -f .env && echo ".env exists" || echo ".env missing"
-          grep -q '^JWT_SECRET=.\+' .env && echo "JWT_SECRET is set" || echo "JWT_SECRET is missing"
-
-      - name: End 2 End test
-        run: pnpm --filter backend test:e2e
 
       - name: Setup pnpm & install
         run: |
@@ -75,12 +67,8 @@ jobs:
           corepack prepare pnpm@12.6.0 --activate
           pnpm install --frozen-lockfile --prefer-offline
 
-#      - name: Unit test
-#        run: pnpm --filter backend test:unit
+      - name: Unit test
+        run: pnpm --filter backend test
 
       - name: End 2 End test
         run: pnpm --filter backend test:e2e
-#
-#      - name: Playwright test
-#        working-directory: backend
-#        run: pnpm --filter backend test:playwright
