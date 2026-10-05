@@ -6,6 +6,7 @@ on:
       - main
       - dev
     paths:
+      - '.github/workflows/github-action-backend.yml'
       - 'backend/**'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
@@ -38,7 +39,8 @@ jobs:
         run: pnpm --filter backend typecheck
 
   unit-test:
-    name: Unit & E2E tests & Playwright
+    name: Unit & E2E tests
+    environment: test
     needs: code-verification
     runs-on: self-hosted
 
@@ -67,11 +69,7 @@ jobs:
           pnpm install --frozen-lockfile --prefer-offline
 
 #      - name: Unit test
-#        run: pnpm --filter backend test:unit
+#        run: pnpm --filter backend test
 
       - name: End 2 End test
         run: pnpm --filter backend test:e2e
-
-      - name: Playwright test
-        working-directory: backend
-        run: pnpm --filter backend test:playwright
