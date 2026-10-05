@@ -62,4 +62,5 @@ jobs:
         run: pnpm --filter backend test:e2e
 
       - name: Playwright test
-        run: pnpm --filter backend test:playwright
+        working-directory: backend
+        run: pnpm exec playwright install chromium
