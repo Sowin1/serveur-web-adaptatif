@@ -17,6 +17,7 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter(),
   );
+  app.enableCors();
 
   /**
    * Swagger auth
