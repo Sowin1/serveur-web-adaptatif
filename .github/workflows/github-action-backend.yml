@@ -6,6 +6,7 @@ on:
       - main
       - dev
     paths:
+      - '.github/workflows/github-action-backend.yml'
       - 'backend/**'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
