@@ -29,7 +29,7 @@ describe('Battery', () => {
   });
 
   it(`Battery Auth JWT Authentication: should work`, async () => {
-    const result = await app
+    await app
       .inject({
         method: 'POST',
         url: '/battery/login',
