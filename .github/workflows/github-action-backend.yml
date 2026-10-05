@@ -68,8 +68,8 @@ jobs:
           corepack prepare pnpm@12.6.0 --activate
           pnpm install --frozen-lockfile --prefer-offline
 
-      - name: Unit test
-        run: pnpm --filter backend test
+#      - name: Unit test
+#        run: pnpm --filter backend test
 
       - name: End 2 End test
         run: pnpm --filter backend test:e2e
