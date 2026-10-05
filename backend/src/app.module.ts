@@ -5,7 +5,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { AppService } from './app.service.js';
 
 @Module({
-  imports: [ConfigModule.forRoot({isGlobal: true,}), AuthModule,],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })

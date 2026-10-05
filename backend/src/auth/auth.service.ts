@@ -1,5 +1,5 @@
-import {Injectable} from '@nestjs/common';
-import {ConfigService} from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -7,8 +7,7 @@ export class AuthService {
 
   // Handle the login with only the password
   async login(password: string) {
-
-    const adminPassword = this.configService.get<string>('ADMIN_PASSWORD',);
+    const adminPassword = this.configService.get<string>('ADMIN_PASSWORD');
 
     if (password !== adminPassword) {
       throw new Error('Wrong password');

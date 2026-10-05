@@ -1,7 +1,7 @@
-import {Body, Controller, Get, Post, Res, UseGuards} from '@nestjs/common';
-import type {Response} from 'express';
-import {AuthService} from './auth.service.js';
-import {AuthGuard} from './auth.guard.js';
+import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
+import type { Response } from 'express';
+import { AuthService } from './auth.service.js';
+import { AuthGuard } from './auth.guard.js';
 
 @Controller('auth')
 export class AuthController {
@@ -9,7 +9,10 @@ export class AuthController {
 
   // Create cookies if the login is successful
   @Post('login')
-  async login(@Body() body: {password: string}, @Res({ passthrough: true }) res: Response,) {
+  async login(
+    @Body() body: { password: string },
+    @Res({ passthrough: true }) res: Response,
+  ) {
     await this.authService.login(body.password);
 
     res.cookie('isAdmin', 'true', {

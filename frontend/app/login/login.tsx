@@ -1,10 +1,9 @@
 'use client';
 
-import {useState} from 'react';
-import {useRouter} from 'next/navigation';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Login() {
-
   const [password, setPassword] = useState('');
   const router = useRouter();
 
@@ -19,7 +18,7 @@ export default function Login() {
       },
       credentials: 'include',
       body: JSON.stringify({
-        password
+        password,
       }),
     });
 
@@ -34,7 +33,6 @@ export default function Login() {
         <h1 className="mb-2 text-3xl font-bold text-gray-900">Connexion</h1>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-
           <div>
             <label
               htmlFor="password"
