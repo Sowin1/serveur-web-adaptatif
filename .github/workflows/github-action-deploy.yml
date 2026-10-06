@@ -1,0 +1,13 @@
+name: CI Backend
+
+on:
+  push:
+    branches:
+      - main
+    defaults:
+      run:
+        shell: bash
+jobs:
+  server-connection:
+    
+

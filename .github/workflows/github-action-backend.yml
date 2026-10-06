@@ -75,7 +75,7 @@ jobs:
   build-backend:
     needs: unit-test
     runs-on: self-hosted
-    if: github.base_ref == 'dev'
+    if: github.base_ref == 'main'
     defaults:
       run:
         shell: bash
