@@ -16,9 +16,6 @@ jobs:
     name: Code verification
     runs-on: self-hosted
 
-    container:
-      image: node:24-alpine
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -40,6 +37,7 @@ jobs:
 
   unit-test:
     name: Unit & E2E tests
+    if: contains(github.ref, '-prod') && github.ref == 'refs/heads/main'
     environment: test
     needs: code-verification
     runs-on: self-hosted
@@ -50,6 +48,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Setup pnpm & install
+        run: |
+          corepack enable
+          corepack prepare pnpm@12.6.0 --activate
+          pnpm install --frozen-lockfile --prefer-offline
 
       - name: Run .env creating
         uses: ./.github/actions/env-action
@@ -61,6 +64,28 @@ jobs:
           AUTH_BATTERY_PASS: ${{ secrets.AUTH_BATTERY_PASS }}
           ENODE_CLIENT_SECRET: ${{ secrets.ENODE_CLIENT_SECRET }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+
+#      - name: Unit test
+#        run: pnpm --filter backend test
+
+      - name: End 2 End test
+        run: pnpm --filter backend test:e2e
+
+  build-backend:
+    needs: unit-test
+    runs-on: self-hosted
+    if: github.base_ref == 'dev'
+    defaults:
+      run:
+        shell: bash
+    environment: production
+    container:
+      image: node:24-alpine
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Setup pnpm & install
         run: |
@@ -68,8 +93,24 @@ jobs:
           corepack prepare pnpm@12.6.0 --activate
           pnpm install --frozen-lockfile --prefer-offline
 
-#      - name: Unit test
-#        run: pnpm --filter backend test
+      - name: Run .env creating for production
+        uses: ./.github/actions/env-action
+        with:
+          ENODE_URL: ${{ vars.ENODE_URL }}
+          ENODE_TOKEN_URL: ${{ vars.ENODE_TOKEN_URL }}
+          ENODE_CLIENT_ID: ${{ vars.ENODE_CLIENT_ID }}
+          AUTH_BATTERY: ${{ vars.AUTH_BATTERY }}
+          AUTH_BATTERY_PASS: ${{ secrets.AUTH_BATTERY_PASS }}
+          ENODE_CLIENT_SECRET: ${{ secrets.ENODE_CLIENT_SECRET }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
 
-      - name: End 2 End test
-        run: pnpm --filter backend test:e2e
+      - name: Build backend
+        run: |
+          pnpm build:backend
+
+      - name: Save backend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-build
+          path: backend/dist/
