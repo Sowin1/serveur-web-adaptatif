@@ -4,10 +4,29 @@ on:
   push:
     branches:
       - main
-    defaults:
-      run:
-        shell: bash
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
   server-connection:
-    
+    runs-on: self-hosted
+    environment: production
 
+    steps:
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "${{ secrets.VPS_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.VPS_IP }} > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy Backend
+        run: |
+          ssh \
+            -i ~/.ssh/id_ed25519 \
+            -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.VPS_IP }}"
