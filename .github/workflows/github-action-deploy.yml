@@ -1,9 +1,13 @@
-name: CI Backend
+name: Run Backend Backend
 
 on:
   push:
     branches:
       - main
+    workflow_run:
+      workflows: [ "CI Backend" ]
+      types:
+        - completed
 
 defaults:
   run:
@@ -14,7 +18,13 @@ jobs:
     runs-on: self-hosted
     environment: production
 
+
     steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
@@ -24,9 +34,54 @@ jobs:
           ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.VPS_IP }} > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
-      - name: Deploy Backend
+      - name: Download backend artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-build
+          path: backend/
+
+      - name: Transfer workspace files
+        run: |
+          scp -C \
+            -P "${{ secrets.SSH_PORT }}" \
+            package.json \
+            pnpm-lock.yaml \
+            pnpm-workspace.yaml \
+            "${{ secrets.SSH_USER }}@${{ secrets.VPS_IP }}:${{ vars.VPS_WORKDIR }}/"  
+
+      - name: Initializing env variable
+        uses: ./.github/actions/env-action
+        with:
+          ENODE_URL: ${{ vars.ENODE_URL }}
+          ENODE_TOKEN_URL: ${{ vars.ENODE_TOKEN_URL }}
+          ENODE_CLIENT_ID: ${{ vars.ENODE_CLIENT_ID }}
+          AUTH_BATTERY: ${{ vars.AUTH_BATTERY }}
+          AUTH_BATTERY_PASS: ${{ secrets.AUTH_BATTERY_PASS }}
+          ENODE_CLIENT_SECRET: ${{ secrets.ENODE_CLIENT_SECRET }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+
+      - name: Transfer Backend
+        run: |
+          scp -r \
+            -C \
+            -P ${{ secrets.SSH_PORT }} \
+            backend \
+            "${{ secrets.SSH_USER }}@${{ secrets.VPS_IP }}:${{ vars.VPS_WORKDIR }}"
+
+      - name: Transfer env file
+        run: |
+          scp -C \
+            -P ${{ secrets.SSH_PORT }} \
+            .env \
+            "${{ secrets.SSH_USER }}@${{ secrets.VPS_IP }}:${{ vars.VPS_WORKDIR }}"
+          
+          
+
+      - name: RUn Backend
         run: |
           ssh \
             -i ~/.ssh/id_ed25519 \
             -p "${{ secrets.SSH_PORT }}" \
-            "${{ secrets.SSH_USER }}@${{ secrets.VPS_IP }}"
+            "${{ secrets.SSH_USER }}@${{ secrets.VPS_IP }}" \
+            "cd '${{ vars.VPS_WORKDIR }}' && pnpm install --prod --frozen-lockfile && cd backend && (pm2 restart backend || pm2 start main.js --name backend)"

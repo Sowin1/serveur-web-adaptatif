@@ -79,7 +79,6 @@ jobs:
     defaults:
       run:
         shell: bash
-    environment: production
     container:
       image: node:24-alpine
 
@@ -93,21 +92,10 @@ jobs:
           corepack prepare pnpm@12.6.0 --activate
           pnpm install --frozen-lockfile --prefer-offline
 
-      - name: Run .env creating for production
-        uses: ./.github/actions/env-action
-        with:
-          ENODE_URL: ${{ vars.ENODE_URL }}
-          ENODE_TOKEN_URL: ${{ vars.ENODE_TOKEN_URL }}
-          ENODE_CLIENT_ID: ${{ vars.ENODE_CLIENT_ID }}
-          AUTH_BATTERY: ${{ vars.AUTH_BATTERY }}
-          AUTH_BATTERY_PASS: ${{ secrets.AUTH_BATTERY_PASS }}
-          ENODE_CLIENT_SECRET: ${{ secrets.ENODE_CLIENT_SECRET }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
-
       - name: Build backend
         run: |
           pnpm build:backend
+          cp backend/package.json backend/dist/
 
       - name: Save backend build
         uses: actions/upload-artifact@v4
