@@ -10,6 +10,8 @@
     "lint:fix": "pnpm -r --if-present lint:fix",
     "typecheck": "pnpm -r --if-present typecheck",
     "build": "pnpm -r build",
+    "build:frontend": "pnpm --filter frontend build",
+    "build:backend": "pnpm --filter backend build",
     "test": "pnpm -r --if-present test"
   },
   "devDependencies": {
