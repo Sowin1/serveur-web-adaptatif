@@ -10,7 +10,7 @@ on:
       - main
 defaults:
   run:
-    shell: bash
+    shell: sh
 
 jobs:
   server-connection:
