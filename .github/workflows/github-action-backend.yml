@@ -19,6 +19,8 @@ jobs:
   code-verification:
     name: Code verification
     runs-on: self-hosted
+    container:
+      image: node:24-bookworm-slim
 
     steps:
       - name: Checkout repository
@@ -51,7 +53,7 @@ jobs:
     runs-on: self-hosted
 
     container:
-      image: node:24-alpine
+      image: node:24-bookworm-slim
 
     steps:
       - name: Checkout repository
@@ -91,9 +93,9 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     defaults:
       run:
-        shell: bash
+        shell: sh
     container:
-      image: node:24-alpine
+      image: node:24-bookworm-slim
 
     steps:
       - name: Checkout repository
