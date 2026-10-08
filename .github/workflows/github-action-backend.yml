@@ -11,6 +11,10 @@ on:
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
 
+  push:
+    branches:
+      - main
+
 jobs:
   code-verification:
     name: Code verification
@@ -37,7 +41,6 @@ jobs:
 
   unit-test:
     name: Unit & E2E tests
-    if: contains(github.ref, '-prod') && github.ref == 'refs/heads/main'
     environment: test
     needs: code-verification
     runs-on: self-hosted
@@ -75,7 +78,7 @@ jobs:
   build-backend:
     needs: unit-test
     runs-on: self-hosted
-    if: github.base_ref == 'main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     defaults:
       run:
         shell: bash
@@ -102,3 +105,4 @@ jobs:
         with:
           name: backend-build
           path: backend/dist/
+          if-no-files-found: error

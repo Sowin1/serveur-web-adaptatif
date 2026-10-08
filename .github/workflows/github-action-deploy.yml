@@ -1,14 +1,13 @@
 name: Run Backend Backend
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - CI Backend
+    types:
+      - completed
     branches:
       - main
-    workflow_run:
-      workflows: [ "CI Backend" ]
-      types:
-        - completed
-
 defaults:
   run:
     shell: bash
@@ -16,14 +15,32 @@ defaults:
 jobs:
   server-connection:
     runs-on: self-hosted
+    container:
+      image: node:24-bookworm-slim
     environment: production
-
-
+    if: >-
+      ${{
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'main'
+      }}
+    permissions:
+      actions: read
+      contents: read
     steps:
+
+      - name: Install SSH
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends openssh-client
 
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
+      - name: Remove backend sources
+        run: rm -rf backend && mkdir backend
 
       - name: Setup SSH key
         run: |
@@ -38,6 +55,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: backend-build
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
           path: backend/
 
       - name: Transfer workspace files
@@ -75,8 +95,8 @@ jobs:
             -P ${{ secrets.SSH_PORT }} \
             .env \
             "${{ secrets.SSH_USER }}@${{ secrets.VPS_IP }}:${{ vars.VPS_WORKDIR }}"
-          
-          
+
+
 
       - name: RUn Backend
         run: |
