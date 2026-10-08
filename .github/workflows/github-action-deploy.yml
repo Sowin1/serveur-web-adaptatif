@@ -13,7 +13,7 @@ defaults:
     shell: bash
 
 jobs:
-  server-connection:
+  launching-backend:
     runs-on: self-hosted
     container:
       image: node:24-bookworm-slim
