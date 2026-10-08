@@ -48,8 +48,6 @@ jobs:
           chmod 700 ~/.ssh
           echo "${{ secrets.VPS_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          printf '%s\n' "${{ secrets.VPS_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
 
       - name: Download backend artifact
         uses: actions/download-artifact@v4
@@ -63,6 +61,7 @@ jobs:
       - name: Transfer workspace files
         run: |
           scp -C \
+            -o StrictHostKeyChecking=accept-new \
             -P "${{ secrets.SSH_PORT }}" \
             package.json \
             pnpm-lock.yaml \
@@ -84,6 +83,7 @@ jobs:
       - name: Transfer Backend
         run: |
           scp -r \
+            -o StrictHostKeyChecking=accept-new \
             -C \
             -P ${{ secrets.SSH_PORT }} \
             backend \
@@ -92,6 +92,7 @@ jobs:
       - name: Transfer env file
         run: |
           scp -C \
+            -o StrictHostKeyChecking=accept-new \
             -P ${{ secrets.SSH_PORT }} \
             .env \
             "${{ secrets.SSH_USER }}@${{ secrets.VPS_IP }}:${{ vars.VPS_WORKDIR }}"
@@ -99,6 +100,7 @@ jobs:
       - name: Run Backend
         run: |
           ssh \
+            -o StrictHostKeyChecking=accept-new \
             -i ~/.ssh/id_ed25519 \
             -p "${{ secrets.SSH_PORT }}" \
             "${{ secrets.SSH_USER }}@${{ secrets.VPS_IP }}" \
