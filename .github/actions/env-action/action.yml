@@ -54,11 +54,11 @@ runs:
         ADMIN_PASSWORD_VALUE: ${{ inputs.ADMIN_PASSWORD }}
 
       run: |
-        echo "ENODE_URL=$ENODE_URL_VALUE" > .env
-        echo "ENODE_TOKEN_URL=$ENODE_TOKEN_URL_VALUE" > .env
-        echo "ENODE_CLIENT_ID=$ENODE_CLIENT_ID_VALUE" > .env
-        echo "AUTH_BATTERY=$AUTH_BATTERY_VALUE" > .env
-        echo "AUTH_BATTERY_PASS=$AUTH_BATTERY_PASS_VALUE" > .env
-        echo "ENODE_CLIENT_SECRET=$ENODE_CLIENT_SECRET_VALUE" > .env
-        echo "JWT_SECRET=$JWT_SECRET_VALUE" > .env
-        echo "ADMIN_PASSWORD=ADMIN_PASSWORD_VALUE" > .env
+        echo "ENODE_URL=$ENODE_URL_VALUE" >> .env
+        echo "ENODE_TOKEN_URL=$ENODE_TOKEN_URL_VALUE" >> .env
+        echo "ENODE_CLIENT_ID=$ENODE_CLIENT_ID_VALUE" >> .env
+        echo "AUTH_BATTERY=$AUTH_BATTERY_VALUE" >> .env
+        echo "AUTH_BATTERY_PASS=$AUTH_BATTERY_PASS_VALUE" >> .env
+        echo "ENODE_CLIENT_SECRET=$ENODE_CLIENT_SECRET_VALUE" >> .env
+        echo "JWT_SECRET=$JWT_SECRET_VALUE" >> .env
+        echo "ADMIN_PASSWORD=$ADMIN_PASSWORD_VALUE" >> .env
