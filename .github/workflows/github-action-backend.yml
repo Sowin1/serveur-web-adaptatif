@@ -106,3 +106,8 @@ jobs:
           name: backend-build
           path: backend/dist/
           if-no-files-found: error
+
+      - name: Cleanup workspace
+        if: always()
+        run: |
+          find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
