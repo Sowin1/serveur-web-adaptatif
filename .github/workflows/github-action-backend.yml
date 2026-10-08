@@ -39,6 +39,11 @@ jobs:
       - name: Type check
         run: pnpm --filter backend typecheck
 
+      - name: Cleanup workspace
+        if: always()
+        run: |
+          find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+
   unit-test:
     name: Unit & E2E tests
     environment: test
@@ -75,6 +80,11 @@ jobs:
       - name: End 2 End test
         run: pnpm --filter backend test:e2e
 
+      - name: Cleanup workspace
+        if: always()
+        run: |
+          find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+
   build-backend:
     needs: unit-test
     runs-on: self-hosted
@@ -106,3 +116,8 @@ jobs:
           name: backend-build
           path: backend/dist/
           if-no-files-found: error
+
+      - name: Cleanup workspace
+        if: always()
+        run: |
+          find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
