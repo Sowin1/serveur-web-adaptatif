@@ -61,6 +61,7 @@ jobs:
       - name: Transfer workspace files
         run: |
           scp -C \
+            -i ~/.ssh/id_ed25519 \
             -o StrictHostKeyChecking=accept-new \
             -P "${{ secrets.SSH_PORT }}" \
             package.json \
@@ -83,6 +84,7 @@ jobs:
       - name: Transfer Backend
         run: |
           scp -r \
+            -i ~/.ssh/id_ed25519 \
             -o StrictHostKeyChecking=accept-new \
             -C \
             -P ${{ secrets.SSH_PORT }} \
@@ -92,6 +94,7 @@ jobs:
       - name: Transfer env file
         run: |
           scp -C \
+            -i ~/.ssh/id_ed25519 \
             -o StrictHostKeyChecking=accept-new \
             -P ${{ secrets.SSH_PORT }} \
             .env \
