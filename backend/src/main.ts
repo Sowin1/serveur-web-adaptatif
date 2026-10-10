@@ -8,6 +8,7 @@ import {
   DocumentBuilder,
   SwaggerCustomOptions,
 } from '@nestjs/swagger';
+import cookie from '@fastify/cookie';
 import { AppModule } from './app.module.js';
 import { BatteryModule } from './battery/battery.module.js';
 import { BatteryAuthModule } from './battery-auth/battery-auth.module.js';
@@ -17,6 +18,8 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter(),
   );
+
+  await app.register(cookie);
 
   /**
    * Swagger auth

@@ -6,29 +6,29 @@ import { useRouter } from 'next/navigation';
 export default function Admin() {
   const router = useRouter();
 
-  // If you log out, redirect yourself to login page
+  // Verifiy if the user is log in
   useEffect(() => {
     const checkAuth = async () => {
-      const response = await fetch('http://localhost:3000/auth/admin', {
-        credentials: 'include',
-      });
+        const response = await fetch('/api/auth/admin', {
+          credentials: 'include',
+        });
 
-      if (response.status === 401) {
-        router.push('/login');
-      }
+        if (!response.ok) {
+          router.replace('/login');
+        }
     };
 
     checkAuth();
   }, [router]);
 
-  // Handle the logout bouton
+  // Déconnexion
   const handleLogout = async () => {
-    await fetch('http://localhost:3000/auth/logout', {
-      method: 'POST',
-      credentials: 'include',
-    });
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
 
-    router.push('/login');
+      router.push('/login');
   };
 
   return (

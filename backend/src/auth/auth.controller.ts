@@ -1,41 +1,44 @@
 import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
-import type { Response } from 'express';
+import type { FastifyReply } from 'fastify';
 import { AuthService } from './auth.service.js';
 import { AuthGuard } from './auth.guard.js';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
-  // Create cookies if the login is successful
+  // API for login
   @Post('login')
   async login(
     @Body() body: { password: string },
-    @Res({ passthrough: true }) res: Response,
+    @Res({ passthrough: true }) reply: FastifyReply,
   ) {
     await this.authService.login(body.password);
 
-    res.cookie('isAdmin', 'true', {
+    reply.setCookie('isAdmin', 'true', {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
+      path: '/',
     });
+
+    return { success: true };
   }
 
-  // Delete the cookie if the admin logout
+  // API that handle the logout
   @Post('logout')
-  logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('isAdmin', {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
+  logout(@Res({ passthrough: true }) reply: FastifyReply) {
+    reply.clearCookie('isAdmin', {
+      path: '/',
     });
+
+    return { success: true };
   }
 
-  // Verify if you are logged as admin
+  // API to verify if the admin is login or not
   @Get('admin')
   @UseGuards(AuthGuard)
   admin() {
-    return;
+    return { authenticated: true };
   }
 }
