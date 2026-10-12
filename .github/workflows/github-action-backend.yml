@@ -6,17 +6,21 @@ on:
       - main
       - dev
     paths:
+      - '.github/workflows/github-action-backend.yml'
       - 'backend/**'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
+
+  push:
+    branches:
+      - main
 
 jobs:
   code-verification:
     name: Code verification
     runs-on: self-hosted
-
     container:
-      image: node:24-alpine
+      image: node:24-bookworm-slim
 
     steps:
       - name: Checkout repository
@@ -37,17 +41,28 @@ jobs:
       - name: Type check
         run: pnpm --filter backend typecheck
 
+      - name: Cleanup workspace
+        if: always()
+        run: |
+          find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+
   unit-test:
-    name: Unit & E2E tests & Playwright
+    name: Unit & E2E tests
+    environment: test
     needs: code-verification
     runs-on: self-hosted
 
     container:
-      image: node:24-alpine
+      image: node:24-bookworm-slim
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Setup pnpm & install
+        run: |
+          corepack enable
+          corepack prepare pnpm@12.6.0 --activate
+          pnpm install --frozen-lockfile --prefer-offline
 
       - name: Run .env creating
         uses: ./.github/actions/env-action
@@ -59,6 +74,32 @@ jobs:
           AUTH_BATTERY_PASS: ${{ secrets.AUTH_BATTERY_PASS }}
           ENODE_CLIENT_SECRET: ${{ secrets.ENODE_CLIENT_SECRET }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+
+#      - name: Unit test
+#        run: pnpm --filter backend test
+
+      - name: End 2 End test
+        run: pnpm --filter backend test:e2e
+
+      - name: Cleanup workspace
+        if: always()
+        run: |
+          find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+
+  build-backend:
+    needs: unit-test
+    runs-on: self-hosted
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    defaults:
+      run:
+        shell: sh
+    container:
+      image: node:24-bookworm-slim
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Setup pnpm & install
         run: |
@@ -66,12 +107,19 @@ jobs:
           corepack prepare pnpm@12.6.0 --activate
           pnpm install --frozen-lockfile --prefer-offline
 
-#      - name: Unit test
-#        run: pnpm --filter backend test:unit
+      - name: Build backend
+        run: |
+          pnpm build:backend
+          cp backend/package.json backend/dist/
 
-      - name: End 2 End test
-        run: pnpm --filter backend test:e2e
+      - name: Save backend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-build
+          path: backend/dist/
+          if-no-files-found: error
 
-      - name: Playwright test
-        working-directory: backend
-        run: pnpm exec playwright install chromium
+      - name: Cleanup workspace
+        if: always()
+        run: |
+          find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
