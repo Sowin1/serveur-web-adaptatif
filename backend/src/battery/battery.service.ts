@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  ServiceUnavailableException,
-} from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
@@ -86,25 +82,21 @@ export class BatteryService {
    * Return the list id of available battery
    */
   async getBatteryList(): Promise<any> {
-    try {
-      await this.verifyToken();
-      const res = await firstValueFrom(
-        this.httpService.get(`${this.baseUrl}/batteries`, {
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
-        }),
-      );
+    await this.verifyToken();
+    const res = await firstValueFrom(
+      this.httpService.get(`${this.baseUrl}/batteries`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      }),
+    );
 
-      return res.data.data.map((battery: any) => ({
-        id: battery.id,
-        brand: battery.information.brand,
-        model: battery.information.model,
-        batteryCapacity: battery.chargeState.batteryCapacity,
-      }));
-    } catch (e) {
-      throw e;
-    }
+    return res.data.data.map((battery: any) => ({
+      id: battery.id,
+      brand: battery.information.brand,
+      model: battery.information.model,
+      batteryCapacity: battery.chargeState.batteryCapacity,
+    }));
   }
 
   /**
@@ -158,5 +150,5 @@ export class BatteryService {
     return batteryData.chargeState.status;
   }
 
-  async changeBatteryLevel(idBattery: string, level: number): Promise<void> {}
+  async changeBatteryLevel(_idBattery: string, _level: number): Promise<void> {}
 }

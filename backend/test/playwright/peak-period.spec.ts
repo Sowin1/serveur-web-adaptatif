@@ -1,9 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
-test('verification of prepared content prior to a period of high consumption', async ({
-  page,
-}) => {
-  // const contents = [
+test('verification of prepared content prior to a period of high consumption', async () => {  // const contents = [
   //   '/actualities',
   //   '/events',
   //   '/popular-products',
