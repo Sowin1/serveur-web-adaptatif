@@ -1,14 +1,15 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import type { Request } from 'express';
+import type { FastifyRequest } from 'fastify';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  // Verify if you are connected as admin
   canActivate(context: ExecutionContext): boolean {
-    const request = context.switchToHttp().getRequest<Request>();
+    const request = context.switchToHttp().getRequest<FastifyRequest>();
 
-    if (request.cookies.isAdmin !== 'true') {
-      throw new Error('You are not logged in');
+    const isAdmin = request.cookies.isAdmin;
+
+    if (isAdmin !== 'true') {
+      throw new Error('Unauthorized');
     }
 
     return true;
