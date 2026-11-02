@@ -9,7 +9,7 @@ jobs:
     environment: production
 
     steps:
-      - name: Check VPS_WORKDIR
+      - name: Check VPS_WORKDIRa
         env:
           VPS_WORKDIR: ${{ vars.VPS_WORKDIR }}
         run: |
