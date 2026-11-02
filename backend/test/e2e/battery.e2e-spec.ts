@@ -12,7 +12,7 @@ describe('Battery', () => {
   let token: string = '';
   let password: string = '';
   let batteryList: any = '';
-  let currentBatteryState: string = '';
+  // let currentBatteryState: string = '';
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -101,7 +101,7 @@ describe('Battery', () => {
       })
       .then((result) => {
         expect(result.statusCode).toEqual(200);
-        currentBatteryState = result.json().chargeState.status;
+        // currentBatteryState = result.json().chargeState.status;
       });
   });
 
