@@ -29,10 +29,6 @@ jobs:
       contents: read
     steps:
 
-      - name: Debug VPS_WORKDIR
-        run: |
-          echo "VPS_WORKDIR = '${{ vars.VPS_WORKDIR }}'"
-
       - name: Install SSH
         run: |
           apt-get update
