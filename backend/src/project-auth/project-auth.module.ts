@@ -12,7 +12,7 @@ import { ProjectAuthController } from './project-auth.controller.js';
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
-        secret: configService.getOrThrow<string>('JWT_SECRET'),
+        secret: configService.getOrThrow<string>('JWT_SECRET_PROJECT'),
         signOptions: {
           expiresIn: 33599,
         },

@@ -84,6 +84,9 @@ jobs:
           ENODE_CLIENT_SECRET: ${{ secrets.ENODE_CLIENT_SECRET }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          AUTH_PROJECT: ${{ secrets.AUTH_PROJECT }}
+          AUTH_PROJECT_PASS: ${{ secrets.AUTH_PROJECT_PASS }}
+          JWT_SECRET_PROJECT: ${{ secrets.JWT_SECRET_PROJECT}}
 
       - name: Transfer Backend
         run: |
