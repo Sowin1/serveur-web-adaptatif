@@ -39,20 +39,20 @@ export default function ServicesActifsPage() {
     <main className="min-h-screen bg-white text-gray-900">
       <div className="mx-auto max-w-3xl px-4 py-8">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Active Services</h1>
+          <h1 className="text-2xl font-bold">Services Actifs</h1>
           <button
             type="button"
             onClick={() => setRefreshKey((k) => k + 1)}
             className="rounded border border-gray-300 px-3 py-1 text-sm hover:bg-gray-100"
           >
-            Refresh
+            Rafraîchir
           </button>
         </div>
 
         {!sites && <p className="mt-6 text-gray-600">Loading...</p>}
         {sites?.length === 0 && (
           <p className="mt-6 text-gray-600">
-            No sites available at the moment.
+            Aucun site disponible pour le moment.
           </p>
         )}
 
@@ -76,19 +76,19 @@ function SiteBlock({ site }: { site: Site }) {
             site.active ? 'text-sm text-green-800' : 'text-sm text-gray-400'
           }
         >
-          {site.active ? 'Active' : 'Inactive'}
+          {site.active ? 'Actif' : 'Inactif'}
         </span>
       </div>
 
       {!site.active ? (
-        <p className="mt-2 text-sm text-gray-500">This site is offline.</p>
+        <p className="mt-2 text-sm text-gray-500">Ce site est hors ligne.</p>
       ) : (
         <>
           <h3 className="mt-4 text-sm font-semibold text-gray-700">
-            Services ({actifs.length} out of {site.services.length})
+            Services ({actifs.length} sur {site.services.length})
           </h3>
           {actifs.length === 0 ? (
-            <p className="mt-1 text-sm text-gray-500">No active services.</p>
+            <p className="mt-1 text-sm text-gray-500">Aucun service actif.</p>
           ) : (
             <ul className="mt-1 text-sm">
               {actifs.map((svc) => (
@@ -108,7 +108,7 @@ function SiteBlock({ site }: { site: Site }) {
           {site.features.length > 0 && (
             <>
               <h3 className="mt-4 text-sm font-semibold text-gray-700">
-                Features
+                Fonctionnalités
               </h3>
               <ul className="mt-1 text-sm">
                 {site.features.map((f) => (
@@ -120,7 +120,7 @@ function SiteBlock({ site }: { site: Site }) {
                     <span
                       className={f.enabled ? 'text-green-800' : 'text-red-600'}
                     >
-                      {f.enabled ? 'Enabled' : 'Disabled'}
+                      {f.enabled ? 'Activé' : 'Desactivé'}
                     </span>
                   </li>
                 ))}

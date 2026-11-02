@@ -5,11 +5,11 @@ export const SITE_DEFINITIONS = Symbol('SITE_DEFINITIONS');
 export const SITES: SiteDefinition[] = [
   {
     id: 'portail',
-    name: 'Home Portal',
+    name: 'Portail d\'accueil',
     services: [
       {
         id: 'accueil',
-        name: 'Home',
+        name: 'Accueil',
         route: '/',
         status: 'active',
         priority: true,
@@ -18,7 +18,7 @@ export const SITES: SiteDefinition[] = [
       },
       {
         id: 'energie',
-        name: 'Energy Status',
+        name: 'Status d\'Énergie',
         route: '/api/energie',
         status: 'active',
         priority: true,
@@ -27,7 +27,7 @@ export const SITES: SiteDefinition[] = [
       },
       {
         id: 'urgence',
-        name: 'Emergency Information',
+        name: 'Information d\'Urgence',
         route: '/urgence',
         status: 'active',
         priority: true,
@@ -36,7 +36,7 @@ export const SITES: SiteDefinition[] = [
       },
       {
         id: 'galerie',
-        name: 'Photo Gallery',
+        name: 'Galerie Photo',
         route: '/galerie',
         status: 'stopped',
         priority: false,
@@ -48,17 +48,17 @@ export const SITES: SiteDefinition[] = [
       { id: 'images', name: 'Images', enabled: true, minLevel: 3 },
       {
         id: 'images-hd',
-        name: 'High Definition Images',
+        name: 'Images Haute Définition',
         enabled: false,
         minLevel: 3,
       },
-      { id: 'videos', name: 'Videos', enabled: false, minLevel: 3 },
-      { id: 'recherche', name: 'Search', enabled: true, minLevel: 2 },
+      { id: 'videos', name: 'Vidéos', enabled: false, minLevel: 3 },
+      { id: 'recherche', name: 'Recherche', enabled: true, minLevel: 2 },
     ],
   },
   {
     id: 'blog',
-    name: 'Community Blog',
+    name: 'Blog communautaire',
     services: [
       {
         id: 'articles',
@@ -71,7 +71,7 @@ export const SITES: SiteDefinition[] = [
       },
       {
         id: 'commentaires',
-        name: 'Comments',
+        name: 'Commentaires',
         route: '/api/commentaires',
         status: 'active',
         priority: false,
@@ -81,10 +81,10 @@ export const SITES: SiteDefinition[] = [
     ],
     features: [
       { id: 'images', name: 'Images', enabled: false, minLevel: 3 },
-      { id: 'videos', name: 'Videos', enabled: false, minLevel: 3 },
+      { id: 'videos', name: 'Vidéos', enabled: false, minLevel: 3 },
       {
         id: 'traitements',
-        name: 'Heavy Processing',
+        name: 'Traitement Lourd',
         enabled: false,
         minLevel: 3,
       },
@@ -92,11 +92,11 @@ export const SITES: SiteDefinition[] = [
   },
   {
     id: 'carto',
-    name: 'Cartography',
+    name: 'Cartographie',
     services: [
       {
         id: 'carte',
-        name: 'Interactive Map',
+        name: 'Carte Interactive',
         route: '/carte',
         status: 'stopped',
         priority: false,
@@ -107,7 +107,7 @@ export const SITES: SiteDefinition[] = [
     features: [
       {
         id: 'itineraire',
-        name: 'Route Calculation',
+        name: 'Calcul d\'Itinéraire',
         enabled: false,
         minLevel: 3,
       },
