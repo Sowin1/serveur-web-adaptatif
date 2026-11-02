@@ -6,13 +6,7 @@ const STATE_LABEL = {
   stopped: ['Arrêté', 'text-red-400'],
 };
 
-export default function Niveau0({
-  services,
-  phase,
-}: {
-  services: Service[];
-  phase: Shutdown;
-}) {
+export default function Niveau0({ services, phase } : { services: Service[], phase: Shutdown }) {
   return (
     <section>
       <h2 className="text-lg font-bold">Arrêt propre du systême</h2>

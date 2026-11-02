@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Niveau0 from './_components/Niveau0';
 import { Service, Shutdown } from './_lib/types';
+import Niveau1 from './_components/Niveau1';
 
 const MOCK: Service[] = [
   { name: 'Sites principal', priority: 1, status: 'online' },
@@ -16,7 +17,7 @@ export default function EnergiePage() {
   const [services, setServices] = useState<Service[]>(MOCK);
   const [phase, setPhase] = useState<Shutdown>('stopping');
 
-  //démo
+  //démo niveau 0
   function rejouer() {
     setServices(MOCK);
     setPhase('stopping');
@@ -47,6 +48,7 @@ export default function EnergiePage() {
         Rejouer
       </button>
       <Niveau0 services={services} phase={phase} />
+      <Niveau1 services={services} />
     </main>
   );
 }
