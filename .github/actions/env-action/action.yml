@@ -12,6 +12,18 @@ inputs:
   JWT_SECRET:
     description: 'JWT_SECRET'
     required: true
+    
+  AUTH_PROJECT:
+    description: 'AUTH_BATTERY_PASS'
+    required: true
+
+  AUTH_PROJECT_PASS:
+    description: 'AUTH_PROJECT_PASS'
+    required: true
+
+  JWT_SECRET_PROJECT:
+    description: 'JWT_SECRET'
+    required: true
 
   AUTH_BATTERY:
     description: 'AUTH_BATTERY'
