@@ -17,6 +17,7 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter(),
   );
+  app.setGlobalPrefix('innovant');
   app.enableCors();
 
   /**
