@@ -55,7 +55,7 @@ describe('Energy', () => {
     await app.getHttpAdapter().getInstance().ready();
   });
 
-  it("Energy level, should return the current level", () => {
+  it('Energy level, should return the current level', () => {
     return refreshLevel().then(() =>
       app.inject({ method: 'GET', url: '/sites/level' }).then((result) => {
         expect(result.statusCode).toEqual(200);
@@ -72,7 +72,7 @@ describe('Energy', () => {
     );
   });
 
-  it("Energy level, POST should not exist", () => {
+  it('Energy level, POST should not exist', () => {
     return app
       .inject({ method: 'POST', url: '/sites/level' })
       .then((result) => {
@@ -80,7 +80,7 @@ describe('Energy', () => {
       });
   });
 
-  it("Energy refresh, level 0 should stop every unprotected service", async () => {
+  it('Energy refresh, level 0 should stop every unprotected service', async () => {
     reading = { ...reading, percentage: 3, charging: false };
     await refreshLevel().then((result) => {
       expect(result.statusCode).toEqual(200);
@@ -100,7 +100,7 @@ describe('Energy', () => {
     }
   });
 
-  it("Energy refresh, level 1 should keep only the survival services", async () => {
+  it('Energy refresh, level 1 should keep only the survival services', async () => {
     reading = { ...reading, percentage: 10 };
     await refreshLevel().then((result) => {
       expect(result.json().level).toEqual(1);
@@ -115,7 +115,7 @@ describe('Energy', () => {
     expect(findSite(sites, 'carto').active).toBe(false);
   });
 
-  it("Energy refresh, level 2 should disable images and videos", async () => {
+  it('Energy refresh, level 2 should disable images and videos', async () => {
     reading = { ...reading, percentage: 30 };
     await refreshLevel().then((result) => {
       expect(result.json().level).toEqual(2);
@@ -131,7 +131,7 @@ describe('Energy', () => {
     expect(findFeature(sites, 'blog', 'traitements').enabled).toBe(false);
   });
 
-  it("Energy refresh, level 3 should start every service", async () => {
+  it('Energy refresh, level 3 should start every service', async () => {
     reading = { ...reading, percentage: 60 };
     await refreshLevel().then((result) => {
       expect(result.json().level).toEqual(3);
@@ -148,7 +148,7 @@ describe('Energy', () => {
     }
   });
 
-  it("Energy refresh, a full battery that is not charging should stay at level 3", () => {
+  it('Energy refresh, a full battery that is not charging should stay at level 3', () => {
     reading = { ...reading, percentage: 95, charging: false };
     return refreshLevel().then((result) => {
       expect(result.json().level).toEqual(3);
@@ -156,7 +156,7 @@ describe('Energy', () => {
     });
   });
 
-  it("Energy refresh, a full battery that is charging should give level 4", () => {
+  it('Energy refresh, a full battery that is charging should give level 4', () => {
     reading = { ...reading, percentage: 95, charging: true };
     return refreshLevel().then((result) => {
       expect(result.json().level).toEqual(4);
@@ -165,7 +165,7 @@ describe('Energy', () => {
     });
   });
 
-  it("Energy refresh, a protected service should never be stopped automatically", async () => {
+  it('Energy refresh, a protected service should never be stopped automatically', async () => {
     await app.inject({
       method: 'PATCH',
       url: '/sites/blog/services/articles',
@@ -181,7 +181,7 @@ describe('Energy', () => {
     );
   });
 
-  it("Energy refresh, should keep the last level when the battery cannot be read", () => {
+  it('Energy refresh, should keep the last level when the battery cannot be read', () => {
     failure = new Error('battery unreachable');
     return refreshLevel().then((result) => {
       expect(result.statusCode).toEqual(200);
@@ -191,7 +191,7 @@ describe('Energy', () => {
     });
   });
 
-  it("Energy refresh, should clear the error once the battery answers again", () => {
+  it('Energy refresh, should clear the error once the battery answers again', () => {
     failure = null;
     reading = { ...reading, percentage: 60 };
     return refreshLevel().then((result) => {

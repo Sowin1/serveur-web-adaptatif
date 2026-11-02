@@ -5,7 +5,7 @@ export const SITE_DEFINITIONS = Symbol('SITE_DEFINITIONS');
 export const SITES: SiteDefinition[] = [
   {
     id: 'portail',
-    name: 'Portail d\'accueil',
+    name: "Portail d'accueil",
     services: [
       {
         id: 'accueil',
@@ -18,7 +18,7 @@ export const SITES: SiteDefinition[] = [
       },
       {
         id: 'energie',
-        name: 'Status d\'Énergie',
+        name: "Status d'Énergie",
         route: '/api/energie',
         status: 'active',
         priority: true,
@@ -27,7 +27,7 @@ export const SITES: SiteDefinition[] = [
       },
       {
         id: 'urgence',
-        name: 'Information d\'Urgence',
+        name: "Information d'Urgence",
         route: '/urgence',
         status: 'active',
         priority: true,
@@ -107,7 +107,7 @@ export const SITES: SiteDefinition[] = [
     features: [
       {
         id: 'itineraire',
-        name: 'Calcul d\'Itinéraire',
+        name: "Calcul d'Itinéraire",
         enabled: false,
         minLevel: 3,
       },
