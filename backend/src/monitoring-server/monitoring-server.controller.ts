@@ -1,5 +1,5 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
-import type { ServerInfo } from './monitoring-server.service.js';
+import type { ServerInfo, ProcessInfo } from './monitoring-server.service.js';
 
 import { MonitoringServerService } from './monitoring-server.service.js';
 import { AuthGuard } from '@nestjs/passport';
@@ -21,9 +21,10 @@ export class MonitoringServerController {
   getMonitoringRamUsage(): ServerInfo[] {
     return this.monitoringServerService.usedServerRam();
   }
-  //   @UseGuards(AuthGuard('battery'))
-  //   @Get('list')
-  //   getBatteryList(): Promise<any> {
-  //     return this.batteryService.getBatteryList();
-  //   }
+
+  @UseGuards(AuthGuard('project'))
+  @Get('process')
+  getMonitoringProcess(): Promise<ProcessInfo[]> {
+    return this.monitoringServerService.getProcessus();
+  }
 }
