@@ -18,6 +18,7 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter(),
   );
+  app.setGlobalPrefix('innovants');
   app.enableCors();
 
   await app.register(cookie);
@@ -34,7 +35,12 @@ async function bootstrap() {
     SwaggerModule.createDocument(app, configAuth, {
       include: [BatteryAuthModule],
     });
-  SwaggerModule.setup('docs/auth', app, authDocumentFactory, optionAuth);
+  SwaggerModule.setup(
+    'innovant/docs/auth',
+    app,
+    authDocumentFactory,
+    optionAuth,
+  );
 
   /**
    * Swagger battery
@@ -62,13 +68,16 @@ async function bootstrap() {
       include: [BatteryModule],
     });
   SwaggerModule.setup(
-    'docs/battery',
+    'innovant/docs/battery',
     app,
     batteryDocumentFactory,
     optionBattery,
   );
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen({
+    port: Number(process.env.PORT ?? 3000),
+    host: '127.0.0.1',
+  });
 }
 
 bootstrap();
