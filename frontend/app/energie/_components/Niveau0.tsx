@@ -4,9 +4,10 @@ const STATE_LABEL = {
   online: ['Connecté', 'text-green-400'],
   stopping: ['Arrêt en cours...', 'text-red-400'],
   stopped: ['Arrêté', 'text-red-400'],
+  limited: ['Limité', 'text-orange-400']
 };
 
-export default function Niveau0({ services, phase } : { services: Service[], phase: Shutdown }) {
+export default function Niveau0({ services, phase }: { services: Service[], phase: Shutdown }) {
   return (
     <section>
       <h2 className="text-lg font-bold">Arrêt propre du systême</h2>

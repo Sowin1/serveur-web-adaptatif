@@ -11,8 +11,8 @@ export default function Niveau1({services}: {services: Service[]}) {
                 Les services indispensable sont conservés, et les autres sont coupés pour économiser de l'énergie
             </p>
 
-            <div>
-                <h3 className="text-l font-bold">Services conservés {preserve.length}</h3>
+            <div className="divide-y divide-slate-700">
+                <h3 className="mt-1 mb-1 text-l font-semibold">Services conservés {preserve.length}</h3>
                 {preserve.map((s) => (
                     <div key={s.name} className="flex justify-between py-2">
                         <span>{s.name}
@@ -25,8 +25,8 @@ export default function Niveau1({services}: {services: Service[]}) {
                 )
                 )}
             </div>
-            <div>
-                <h3 className="text-l font-bold">Services coupés {cut.length}</h3>
+            <div className="divide-y divide-slate-700">
+                <h3 className="mt-1 mb-1 text-l font-semibold">Services coupés {cut.length}</h3>
                 {cut.map((s) => (
                     <div key={s.name} className="flex justify-between py-2">
                         <span>{s.name}

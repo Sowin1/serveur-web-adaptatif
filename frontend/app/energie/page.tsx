@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Niveau0 from './_components/Niveau0';
 import { Service, Shutdown } from './_lib/types';
 import Niveau1 from './_components/Niveau1';
+import Niveau2 from './_components/Niveau2';
 
 const MOCK: Service[] = [
   { name: 'Sites principal', priority: 1, status: 'online' },
@@ -49,6 +50,7 @@ export default function EnergiePage() {
       </button>
       <Niveau0 services={services} phase={phase} />
       <Niveau1 services={services} />
+      <Niveau2 services={services}/>
     </main>
   );
 }
