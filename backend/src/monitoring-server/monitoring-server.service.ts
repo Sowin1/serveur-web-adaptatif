@@ -22,11 +22,11 @@ export type ProcessInfo = {
 };
 
 type NginxReturn = {
-  website: string,
-  status: number,
-  go_received: number,
-  go_sent: number,
-}
+  website: string;
+  status: number;
+  go_received: number;
+  go_sent: number;
+};
 
 type NginxRawLogLine = {
   site: string;
@@ -95,23 +95,25 @@ export class MonitoringServerService {
 
   // Processus and services
 
-  getProcessus(): Promise<ProcessInfo[]>{
+  getProcessus(): Promise<ProcessInfo[]> {
     return new Promise((resolve, reject) => {
-      const services = spawn(
-        'ps', ['-eo', 'pid,comm,%cpu,rss','--no-headers']
-      );
+      const services = spawn('ps', [
+        '-eo',
+        'pid,comm,%cpu,rss',
+        '--no-headers',
+      ]);
       let result = '';
       let error = '';
 
-      services.stdout.on('data', data => {
+      services.stdout.on('data', (data) => {
         result += data.toString();
       });
 
-      services.stderr.on('data', data => {
+      services.stderr.on('data', (data) => {
         error += data.toString();
       });
 
-      services.on('error', error => {
+      services.on('error', (error) => {
         reject(error);
       });
 
@@ -129,22 +131,20 @@ export class MonitoringServerService {
             cpu: Number(cpu),
             ram: Number(ram),
           };
-        })
+        });
         resolve(processes);
       });
-
-    })
-
+    });
   }
 
-  private _getNginxLogs():string {
+  private _getNginxLogs(): string {
     const logFilePath = '/var/log/nginx/monitoring.log';
 
     try {
       const fileContent: string = readFileSync(logFilePath, 'utf-8');
 
       if (!fileContent.trim()) {
-        throw new NotFoundException("The log file is empty");
+        throw new NotFoundException('The log file is empty');
       }
 
       return fileContent;
@@ -160,25 +160,23 @@ export class MonitoringServerService {
     }
   }
 
-  nginxStats():NginxReturn[] {
+  nginxStats(): NginxReturn[] {
     const logs = this._getNginxLogs();
     const logsLines = logs.split('\n');
 
     return logsLines.map((line: any): NginxReturn => {
-      const service = JSON.parse(line);
-      const { site, status, received, sent } = service // time and time also available but not use
+      const service = JSON.parse(line) as NginxRawLogLine;
+      const { site, status, received, sent } = service; // time and time also available but not use
 
-
-      const receivedToGo = received / (1024 * 1024 * 1024)
-      const sentToGo = sent / (1024 * 1024 * 1024)
+      const receivedToGo = received / (1024 * 1024 * 1024);
+      const sentToGo = sent / (1024 * 1024 * 1024);
 
       return {
         website: site,
         status: status,
         go_received: Number(receivedToGo.toFixed(6)),
         go_sent: Number(sentToGo.toFixed(6)),
-      }
+      };
     });
   }
-
 }

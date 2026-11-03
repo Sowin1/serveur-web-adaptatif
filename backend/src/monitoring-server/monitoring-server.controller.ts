@@ -31,6 +31,6 @@ export class MonitoringServerController {
   @UseGuards(AuthGuard('project'))
   @Get('nginx-network')
   getMonitoringNginxNetwork(): any {
-    return this.monitoringServerService.nginxStats()
+    return this.monitoringServerService.nginxStats();
   }
 }
