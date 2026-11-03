@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import * as os from 'node:os';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { spawn } from 'node:child_process';
+import { readFileSync } from 'fs';
 
 export type ServerInfo = {
   label: string;
@@ -20,6 +21,21 @@ export type ProcessInfo = {
   ram: number;
 };
 
+type NginxReturn = {
+  website: string,
+  status: number,
+  go_received: number,
+  go_sent: number,
+}
+
+type NginxRawLogLine = {
+  site: string;
+  time: string;
+  status: number;
+  received: number;
+  sent: number;
+  duration: number;
+};
 @Injectable()
 export class MonitoringServerService {
   /**
@@ -118,5 +134,51 @@ export class MonitoringServerService {
       });
 
     })
+
   }
+
+  private _getNginxLogs():string {
+    const logFilePath = '/var/log/nginx/monitoring.log';
+
+    try {
+      const fileContent: string = readFileSync(logFilePath, 'utf-8');
+
+      if (!fileContent.trim()) {
+        throw new NotFoundException("The log file is empty");
+      }
+
+      return fileContent;
+    } catch (e: any) {
+      if (e instanceof NotFoundException) {
+        throw e;
+      }
+
+      if (e.code === 'ENOENT') {
+        throw new NotFoundException(`Cannot find log file : ${logFilePath}`);
+      }
+      throw e;
+    }
+  }
+
+  nginxStats():NginxReturn[] {
+    const logs = this._getNginxLogs();
+    const logsLines = logs.split('\n');
+
+    return logsLines.map((line: any): NginxReturn => {
+      const service = JSON.parse(line);
+      const { site, status, received, sent } = service // time and time also available but not use
+
+
+      const receivedToGo = received / (1024 * 1024 * 1024)
+      const sentToGo = sent / (1024 * 1024 * 1024)
+
+      return {
+        website: site,
+        status: status,
+        go_received: Number(receivedToGo.toFixed(6)),
+        go_sent: Number(sentToGo.toFixed(6)),
+      }
+    });
+  }
+
 }

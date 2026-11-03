@@ -27,4 +27,10 @@ export class MonitoringServerController {
   getMonitoringProcess(): Promise<ProcessInfo[]> {
     return this.monitoringServerService.getProcessus();
   }
+
+  @UseGuards(AuthGuard('project'))
+  @Get('nginx-network')
+  getMonitoringNginxNetwork(): any {
+    return this.monitoringServerService.nginxStats()
+  }
 }
