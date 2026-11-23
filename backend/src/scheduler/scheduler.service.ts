@@ -20,8 +20,9 @@ export class SchedulerService {
     const currentDay = now.getDay();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-    return this.activeSlots.some(slot => {
-      if (slot.daysOfWeek && !slot.daysOfWeek.includes(currentDay)) return false;
+    return this.activeSlots.some((slot) => {
+      if (slot.daysOfWeek && !slot.daysOfWeek.includes(currentDay))
+        return false;
       const [sH, sM] = slot.start.split(':').map(Number);
       const [eH, eM] = slot.end.split(':').map(Number);
       const startMin = sH * 60 + sM;

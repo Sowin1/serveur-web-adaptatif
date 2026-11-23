@@ -1,4 +1,4 @@
-// frontend/app/page.tsx 
+// frontend/app/page.tsx
 import TimeSlotConfig from '@/component/TimeSlotConfig';
 
 export default function Page() {

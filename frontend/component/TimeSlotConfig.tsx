@@ -20,18 +20,25 @@ const DAYS = [
 
 export default function TimeSlotConfig() {
   const [slots, setSlots] = useState<TimeSlot[]>([
-    { start: '08:00', end: '19:00', daysOfWeek: [1, 2, 3, 4, 5] }
+    { start: '08:00', end: '19:00', daysOfWeek: [1, 2, 3, 4, 5] },
   ]);
 
   const handleAddSlot = () => {
-    setSlots([...slots, { start: '09:00', end: '17:00', daysOfWeek: [1, 2, 3, 4, 5] }]);
+    setSlots([
+      ...slots,
+      { start: '09:00', end: '17:00', daysOfWeek: [1, 2, 3, 4, 5] },
+    ]);
   };
 
   const handleRemoveSlot = (index: number) => {
     setSlots(slots.filter((_, i) => i !== index));
   };
 
-  const handleChange = (index: number, field: keyof TimeSlot, value: any) => {
+  const handleChange = <K extends keyof TimeSlot>(
+    index: number,
+    field: K,
+    value: TimeSlot[K],
+  ) => {
     const updated = [...slots];
     updated[index] = { ...updated[index], [field]: value };
     setSlots(updated);
@@ -41,9 +48,9 @@ export default function TimeSlotConfig() {
     const slot = slots[index];
     const currentDays = slot.daysOfWeek || [];
     const updatedDays = currentDays.includes(dayValue)
-      ? currentDays.filter(d => d !== dayValue)
+      ? currentDays.filter((d) => d !== dayValue)
       : [...currentDays, dayValue].sort();
-    
+
     handleChange(index, 'daysOfWeek', updatedDays);
   };
 
@@ -67,30 +74,39 @@ export default function TimeSlotConfig() {
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md max-w-xl mx-auto">
-      <h2 className="text-xl font-bold mb-4 text-gray-800">Gestion des plages horaires d'activité</h2>
-      
+      <h2 className="text-xl font-bold mb-4 text-gray-800">
+        Gestion des plages horaires d’activité
+      </h2>
+
       {slots.map((slot, index) => (
-        <div key={index} className="mb-4 p-4 border rounded-md bg-gray-50 flex flex-col gap-3">
+        <div
+          key={index}
+          className="mb-4 p-4 border rounded-md bg-gray-50 flex flex-col gap-3"
+        >
           <div className="flex items-center gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-600">Début</label>
-              <input 
-                type="time" 
-                value={slot.start} 
+              <label className="block text-xs font-semibold text-gray-600">
+                Début
+              </label>
+              <input
+                type="time"
+                value={slot.start}
                 onChange={(e) => handleChange(index, 'start', e.target.value)}
                 className="border p-1 rounded text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-600">Fin</label>
-              <input 
-                type="time" 
-                value={slot.end} 
+              <label className="block text-xs font-semibold text-gray-600">
+                Fin
+              </label>
+              <input
+                type="time"
+                value={slot.end}
                 onChange={(e) => handleChange(index, 'end', e.target.value)}
                 className="border p-1 rounded text-sm"
               />
             </div>
-            <button 
+            <button
               onClick={() => handleRemoveSlot(index)}
               className="ml-auto text-red-500 hover:text-red-700 text-sm font-medium"
             >
@@ -99,9 +115,11 @@ export default function TimeSlotConfig() {
           </div>
 
           <div>
-            <span className="block text-xs font-semibold text-gray-600 mb-1">Jours actifs</span>
+            <span className="block text-xs font-semibold text-gray-600 mb-1">
+              Jours actifs
+            </span>
             <div className="flex gap-2">
-              {DAYS.map(day => {
+              {DAYS.map((day) => {
                 const isSelected = slot.daysOfWeek?.includes(day.value);
                 return (
                   <button
@@ -109,8 +127,8 @@ export default function TimeSlotConfig() {
                     type="button"
                     onClick={() => handleDayToggle(index, day.value)}
                     className={`px-2 py-1 text-xs rounded font-medium border ${
-                      isSelected 
-                        ? 'bg-blue-600 text-white border-blue-600' 
+                      isSelected
+                        ? 'bg-blue-600 text-white border-blue-600'
                         : 'bg-white text-gray-700 border-gray-300'
                     }`}
                   >
