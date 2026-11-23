@@ -8,6 +8,9 @@ import { describeLevel, describeQuarantine } from './_components/ui';
 import {
   fetchLevel,
   fetchSites,
+  quarantineService,
+  quarantineSite,
+  releaseSite,
   runServiceAction,
   runSiteAction,
   updateServiceSettings,
@@ -283,6 +286,13 @@ export default function ServicesPage() {
               )
             }
             onRelease={(service) => release(currentSite, service)}
+            onQuarantineService={(service, reason) =>
+              run(() => quarantineService(currentSite.id, service.id, reason))
+            }
+            onQuarantineSite={(reason) =>
+              run(() => quarantineSite(currentSite.id, reason))
+            }
+            onReleaseSite={() => run(() => releaseSite(currentSite.id))}
           />
         )}
       </div>

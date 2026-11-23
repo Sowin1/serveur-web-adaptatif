@@ -3,6 +3,7 @@ import {
   Checkbox,
   describeQuarantine,
   describeSite,
+  QuarantineForm,
   SiteActions,
   STATUS_TEXT,
   TextButton,
@@ -19,6 +20,9 @@ export function SiteTab({
   onToggleRunning,
   onToggleNeverStop,
   onRelease,
+  onQuarantineService,
+  onQuarantineSite,
+  onReleaseSite,
 }: {
   site: Site;
   total: number;
@@ -29,7 +33,11 @@ export function SiteTab({
   onToggleRunning: (service: Service, running: boolean) => void;
   onToggleNeverStop: (service: Service, neverAutoStop: boolean) => void;
   onRelease: (service: Service) => void;
+  onQuarantineService: (service: Service, reason: string) => void;
+  onQuarantineSite: (reason: string) => void;
+  onReleaseSite: () => void;
 }) {
+  const inQuarantine = site.services.filter((s) => s.quarantine !== null);
   const available = site.features.filter((f) => f.enabled);
   const paused = site.features.filter((f) => !f.enabled);
 
@@ -51,6 +59,26 @@ export function SiteTab({
           </p>
         </div>
         <SiteActions site={site} disabled={disabled} onAction={onSiteAction} />
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center justify-end gap-x-6 gap-y-2">
+        {inQuarantine.length > 0 && (
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={onReleaseSite}
+            className="text-sm text-neutral-500 underline-offset-4 hover:text-neutral-900 hover:underline disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Sortir le site de quarantaine
+          </button>
+        )}
+        {inQuarantine.length < site.services.length && (
+          <QuarantineForm
+            label="Mettre le site en quarantaine"
+            disabled={disabled}
+            onConfirm={onQuarantineSite}
+          />
+        )}
       </div>
 
       <div className="mt-6 border-l-2 border-neutral-200 pl-4">
@@ -120,6 +148,18 @@ export function SiteTab({
                     </Checkbox>
                   </div>
                 </div>
+
+                {!quarantined && (
+                  <div className="mt-2">
+                    <QuarantineForm
+                      label="Mettre en quarantaine"
+                      disabled={disabled}
+                      onConfirm={(reason) =>
+                        onQuarantineService(service, reason)
+                      }
+                    />
+                  </div>
+                )}
 
                 {service.quarantine && (
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-l-2 border-red-200 pl-4">

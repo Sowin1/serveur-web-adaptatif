@@ -68,6 +68,21 @@ export class SitesStatusController {
     return this.sitesStatusService.restartSite(siteId);
   }
 
+  @Post(':siteId/quarantine')
+  @HttpCode(200)
+  quarantineSite(
+    @Param('siteId') siteId: string,
+    @Body() body: unknown,
+  ): Promise<Site> {
+    return this.sitesStatusService.quarantineSite(siteId, body);
+  }
+
+  @Post(':siteId/release')
+  @HttpCode(200)
+  releaseSite(@Param('siteId') siteId: string): Site {
+    return this.sitesStatusService.releaseSite(siteId);
+  }
+
   @Post(':siteId/services/:serviceId/start')
   @HttpCode(200)
   start(
@@ -93,6 +108,16 @@ export class SitesStatusController {
     @Param('serviceId') serviceId: string,
   ): Promise<Service> {
     return this.sitesStatusService.restartService(siteId, serviceId);
+  }
+
+  @Post(':siteId/services/:serviceId/quarantine')
+  @HttpCode(200)
+  quarantine(
+    @Param('siteId') siteId: string,
+    @Param('serviceId') serviceId: string,
+    @Body() body: unknown,
+  ): Promise<Service> {
+    return this.sitesStatusService.quarantineService(siteId, serviceId, body);
   }
 
   @Post(':siteId/services/:serviceId/release')

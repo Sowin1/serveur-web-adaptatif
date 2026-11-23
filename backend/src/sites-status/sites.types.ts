@@ -2,7 +2,7 @@ export type ServiceStatus = 'active' | 'stopped' | 'error' | 'quarantine';
 
 export type StopSource = 'admin' | 'auto';
 
-export type QuarantineCause = 'start' | 'stop' | 'health';
+export type QuarantineCause = 'start' | 'stop' | 'health' | 'manual';
 
 export interface QuarantineInfo {
   cause: QuarantineCause;

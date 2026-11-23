@@ -207,6 +207,49 @@ export class SitesStatusService {
     );
   }
 
+  async quarantineService(
+    siteId: string,
+    serviceId: string,
+    body?: unknown,
+  ): Promise<Service> {
+    const { site, service } = this.find(siteId, serviceId);
+    const reason = this.parseReason(body);
+    if (service.status === 'quarantine') {
+      throw new ConflictException(
+        `Service ${serviceId} is already in quarantine`,
+      );
+    }
+    await this.putInQuarantine(site, service, 'manual', reason);
+    return this.toService(service);
+  }
+
+  async quarantineSite(siteId: string, body?: unknown): Promise<Site> {
+    const site = this.findSite(siteId);
+    const reason = this.parseReason(body);
+    const targets = site.services.filter((s) => s.status !== 'quarantine');
+    if (targets.length === 0) {
+      throw new ConflictException(
+        `Every service of site ${siteId} is already in quarantine`,
+      );
+    }
+    for (const service of targets) {
+      await this.putInQuarantine(site, service, 'manual', reason);
+    }
+    return this.toSite(site);
+  }
+
+  releaseSite(siteId: string): Site {
+    const site = this.findSite(siteId);
+    const targets = site.services.filter((s) => s.status === 'quarantine');
+    if (targets.length === 0) {
+      throw new ConflictException(
+        `No service of site ${siteId} is in quarantine`,
+      );
+    }
+    for (const service of targets) this.releaseService(site.id, service.id);
+    return this.toSite(site);
+  }
+
   releaseService(siteId: string, serviceId: string): Service {
     const { site, service } = this.find(siteId, serviceId);
     if (service.status !== 'quarantine') {
@@ -334,18 +377,46 @@ export class SitesStatusService {
       service.status = 'error';
       return;
     }
+    await this.putInQuarantine(site, service, cause, service.lastError);
+  }
+
+  private async putInQuarantine(
+    site: SiteState,
+    service: ServiceState,
+    cause: QuarantineCause,
+    detail: string | null,
+  ): Promise<void> {
     service.status = 'quarantine';
     service.quarantine = {
       cause,
-      detail: service.lastError,
+      detail,
       failures: service.failures,
       since: new Date().toISOString(),
     };
     await this.runner.stop(this.ref(site, service)).catch(() => undefined);
+    const why =
+      cause === 'manual'
+        ? 'by the administrator'
+        : `after ${service.failures} failed ${cause} attempts`;
     this.logger.warn(
-      `Service ${service.id} of site ${site.id} put in quarantine after ${service.failures} failed ${cause} attempts` +
-        (service.lastError ? `: ${service.lastError}` : ''),
+      `Service ${service.id} of site ${site.id} put in quarantine ${why}` +
+        (detail ? `: ${detail}` : ''),
     );
+  }
+
+  private parseReason(body: unknown): string | null {
+    if (body === undefined || body === null || body === '') return null;
+    if (typeof body !== 'object') {
+      throw new BadRequestException('Body must be a JSON object');
+    }
+    const { reason } = body as Record<string, unknown>;
+    if (reason === undefined || reason === null) return null;
+    if (typeof reason !== 'string' || reason.length > 200) {
+      throw new BadRequestException(
+        'reason must be a string of at most 200 characters',
+      );
+    }
+    return reason.trim() || null;
   }
 
   private clearQuarantine(service: ServiceState): void {

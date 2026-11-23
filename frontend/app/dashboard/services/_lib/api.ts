@@ -78,3 +78,23 @@ export function updateServiceSettings(
     settings,
   );
 }
+
+export function quarantineService(
+  siteId: string,
+  serviceId: string,
+  reason: string,
+): Promise<Service> {
+  return send<Service>(
+    'POST',
+    `/sites/${siteId}/services/${serviceId}/quarantine`,
+    { reason },
+  );
+}
+
+export function quarantineSite(siteId: string, reason: string): Promise<Site> {
+  return send<Site>('POST', `/sites/${siteId}/quarantine`, { reason });
+}
+
+export function releaseSite(siteId: string): Promise<Site> {
+  return send<Site>('POST', `/sites/${siteId}/release`);
+}

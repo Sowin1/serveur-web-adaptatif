@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import type {
   EnergyStatus,
@@ -32,6 +33,7 @@ const CAUSE_TEXT: Record<QuarantineCause, string> = {
   start: 'échecs de démarrage',
   stop: "échecs d'arrêt",
   health: 'contrôles de santé échoués',
+  manual: '',
 };
 
 const DATE_FORMAT = new Intl.DateTimeFormat('fr-FR', {
@@ -72,6 +74,9 @@ export function describeLevel(status: EnergyStatus | null): string {
 
 export function describeQuarantine(quarantine: QuarantineInfo): string {
   const since = DATE_FORMAT.format(new Date(quarantine.since));
+  if (quarantine.cause === 'manual') {
+    return `Mis en quarantaine à la main le ${since}`;
+  }
   return `Arrêté le ${since}, après ${quarantine.failures} ${CAUSE_TEXT[quarantine.cause]}`;
 }
 
@@ -133,15 +138,18 @@ export function SiteActions({
   disabled: boolean;
   onAction: (action: SiteAction) => void;
 }) {
-  const state = siteState(site);
+  const startable = site.services.some(
+    (s) => !s.active && s.status !== 'quarantine',
+  );
+  const running = site.services.some((s) => s.active);
   return (
     <div className="flex flex-wrap gap-2">
-      {state !== 'running' && (
+      {startable && (
         <TextButton disabled={disabled} onClick={() => onAction('start')}>
           Démarrer
         </TextButton>
       )}
-      {state !== 'stopped' && (
+      {running && (
         <TextButton disabled={disabled} onClick={() => onAction('stop')}>
           Arrêter
         </TextButton>
@@ -150,5 +158,75 @@ export function SiteActions({
         Redémarrer
       </TextButton>
     </div>
+  );
+}
+
+export function QuarantineForm({
+  label,
+  disabled,
+  onConfirm,
+}: {
+  label: string;
+  disabled: boolean;
+  onConfirm: (reason: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState('');
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setOpen(true)}
+        className="text-sm text-neutral-500 underline-offset-4 hover:text-neutral-900 hover:underline disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        {label}
+      </button>
+    );
+  }
+
+  const confirm = () => {
+    onConfirm(reason.trim());
+    setOpen(false);
+    setReason('');
+  };
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        confirm();
+      }}
+      className="flex flex-wrap items-center gap-2"
+    >
+      <input
+        type="text"
+        value={reason}
+        maxLength={200}
+        onChange={(e) => setReason(e.target.value)}
+        placeholder="Raison (facultatif)"
+        aria-label="Raison de la mise en quarantaine"
+        autoFocus
+        className="w-56 rounded-md border border-neutral-300 px-2 py-1.5 text-sm text-neutral-800 placeholder:text-neutral-400 focus:border-neutral-500 focus:outline-none"
+      />
+      <button
+        type="submit"
+        disabled={disabled}
+        className="rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        Confirmer
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          setOpen(false);
+          setReason('');
+        }}
+        className="text-sm text-neutral-500 hover:text-neutral-900"
+      >
+        Annuler
+      </button>
+    </form>
   );
 }
