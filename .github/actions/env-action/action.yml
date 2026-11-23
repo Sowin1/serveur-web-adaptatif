@@ -12,6 +12,18 @@ inputs:
   JWT_SECRET:
     description: 'JWT_SECRET'
     required: true
+    
+  AUTH_PROJECT:
+    description: 'AUTH_BATTERY_PASS'
+    required: true
+
+  AUTH_PROJECT_PASS:
+    description: 'AUTH_PROJECT_PASS'
+    required: true
+
+  JWT_SECRET_PROJECT:
+    description: 'JWT_SECRET'
+    required: true
 
   AUTH_BATTERY:
     description: 'AUTH_BATTERY'
@@ -33,6 +45,11 @@ inputs:
     required: false
     default: 'ENODE_URL'
 
+  ADMIN_PASSWORD:
+    description: 'ADMIN_PASSWORD'
+    required: false
+    default: 'ADMIN_PASSWORD'
+
 runs:
   using: "composite"
   steps:
@@ -46,6 +63,7 @@ runs:
         AUTH_BATTERY_PASS_VALUE: ${{ inputs.AUTH_BATTERY_PASS }}
         ENODE_CLIENT_SECRET_VALUE: ${{ inputs.ENODE_CLIENT_SECRET }}
         JWT_SECRET_VALUE: ${{ inputs.JWT_SECRET }}
+        ADMIN_PASSWORD_VALUE: ${{ inputs.ADMIN_PASSWORD }}
 
       run: |
         echo "ENODE_URL=$ENODE_URL_VALUE" >> .env
@@ -55,3 +73,4 @@ runs:
         echo "AUTH_BATTERY_PASS=$AUTH_BATTERY_PASS_VALUE" >> .env
         echo "ENODE_CLIENT_SECRET=$ENODE_CLIENT_SECRET_VALUE" >> .env
         echo "JWT_SECRET=$JWT_SECRET_VALUE" >> .env
+        echo "ADMIN_PASSWORD=$ADMIN_PASSWORD_VALUE" >> .env

@@ -1,0 +1,122 @@
+name: Run & Deploy Backend
+
+on:
+  workflow_run:
+    workflows:
+      - CI Backend
+    types:
+      - completed
+    branches:
+      - main
+defaults:
+  run:
+    shell: sh
+
+jobs:
+  launching-backend:
+    runs-on: self-hosted
+    container:
+      image: node:24-bookworm-slim
+    environment: production
+    if: >-
+      ${{
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'main'
+      }}
+    permissions:
+      actions: read
+      contents: read
+    steps:
+
+      - name: Debug VPS_WORKDIR
+        run: |
+          echo "VPS_WORKDIR = '${{ vars.VPS_WORKDIR }}'"
+
+      - name: Install SSH
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends openssh-client
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Remove backend sources
+        run: rm -rf backend && mkdir backend
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "${{ secrets.VPS_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+      - name: Download backend artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-build
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
+          path: backend/
+
+      - name: Transfer workspace files
+        run: |
+          scp -C \
+            -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=accept-new \
+            -P "${{ secrets.SSH_PORT }}" \
+            package.json \
+            pnpm-lock.yaml \
+            pnpm-workspace.yaml \
+            "${{ secrets.SSH_USER }}@${{ secrets.VPS_IP }}:${{ vars.VPS_WORKDIR }}/"  
+
+      - name: Initializing env variable
+        uses: ./.github/actions/env-action
+        with:
+          ENODE_URL: ${{ vars.ENODE_URL }}
+          ENODE_TOKEN_URL: ${{ vars.ENODE_TOKEN_URL }}
+          ENODE_CLIENT_ID: ${{ vars.ENODE_CLIENT_ID }}
+          AUTH_BATTERY: ${{ vars.AUTH_BATTERY }}
+          AUTH_BATTERY_PASS: ${{ secrets.AUTH_BATTERY_PASS }}
+          ENODE_CLIENT_SECRET: ${{ secrets.ENODE_CLIENT_SECRET }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          AUTH_PROJECT: ${{ secrets.AUTH_PROJECT }}
+          AUTH_PROJECT_PASS: ${{ secrets.AUTH_PROJECT_PASS }}
+          JWT_SECRET_PROJECT: ${{ secrets.JWT_SECRET_PROJECT}}
+
+      - name: Transfer Backend
+        run: |
+          scp -r \
+            -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=accept-new \
+            -C \
+            -P ${{ secrets.SSH_PORT }} \
+            backend \
+            "${{ secrets.SSH_USER }}@${{ secrets.VPS_IP }}:${{ vars.VPS_WORKDIR }}"
+
+      - name: Transfer env file
+        run: |
+          scp -C \
+            -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=accept-new \
+            -P ${{ secrets.SSH_PORT }} \
+            .env \
+            "${{ secrets.SSH_USER }}@${{ secrets.VPS_IP }}:${{ vars.VPS_WORKDIR }}"
+
+      - name: Run Backend
+        run: |
+          ssh \
+            -o StrictHostKeyChecking=accept-new \
+            -i ~/.ssh/id_ed25519 \
+            -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.VPS_IP }}" \
+            "cd '${{ vars.VPS_WORKDIR }}' && pnpm install --prod --frozen-lockfile && cd backend && (pm2 restart backend || pm2 start main.js --name backend)"
+
+      - name: Cleanup workspace
+        if: always()
+        run: |
+          find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +

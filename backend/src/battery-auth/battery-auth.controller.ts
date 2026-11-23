@@ -5,12 +5,7 @@ import { BatteryAuthService } from './battery-auth.service.js';
 export class BatteryAuthController {
   constructor(private batteryAuthService: BatteryAuthService) {}
   @Post('battery/login')
-  async authenticate(@Request() req: any) {
-    try {
-      await this.batteryAuthService.validate(req.body.password);
-      return this.batteryAuthService.authenticate();
-    } catch (e) {
-      throw e;
-    }
+  async authenticate(@Request() _req: any) {
+    return await this.batteryAuthService.authenticate();
   }
 }

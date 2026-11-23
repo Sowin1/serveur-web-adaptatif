@@ -1,3 +1,12 @@
+type Statut = 'frais' | 'en_cours' | 'a_generer' | 'a_regenerer';
+
+const pages: { nom: string; heure: string; statut: Statut }[] = [
+  { nom: '/accueil', heure: '16:02', statut: 'frais' },
+  { nom: '/catalogue', heure: '16:02', statut: 'frais' },
+  { nom: '/rapport-mensuel.pdf', heure: '15:40', statut: 'a_regenerer' },
+  { nom: '/profil/utilisateur42', heure: '16:15', statut: 'en_cours' },
+  { nom: '/menu', heure: '', statut: 'a_generer' },
+];
 export default function ContenuCache() {
   return (
     <section className="rounded-xl p-5 flex gap-3">
