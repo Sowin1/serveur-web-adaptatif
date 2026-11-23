@@ -3,6 +3,7 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { SERVICE_RUNNER } from './service-runner.js';
@@ -11,11 +12,15 @@ import { SITE_DEFINITIONS } from './sites.data.js';
 import type {
   Feature,
   OperatingLevel,
+  QuarantineCause,
+  QuarantineInfo,
+  QuarantinedService,
   Service,
   ServiceDefinition,
   ServiceSettings,
   Site,
   SiteDefinition,
+  SiteSettings,
   StopSource,
 } from './sites.types.js';
 
@@ -24,17 +29,23 @@ export const MAX_FAILURES = 3;
 interface ServiceState extends ServiceDefinition {
   failures: number;
   manual: boolean;
+  lastError: string | null;
+  failureCause: QuarantineCause | null;
+  quarantine: QuarantineInfo | null;
 }
 
 interface SiteState {
   id: string;
   name: string;
+  priority: number;
+  alwaysOn: boolean;
   services: ServiceState[];
   features: Feature[];
 }
 
 @Injectable()
 export class SitesStatusService {
+  private readonly logger = new Logger(SitesStatusService.name);
   private readonly sites: SiteState[];
   private level: OperatingLevel | null = null;
 
@@ -42,12 +53,17 @@ export class SitesStatusService {
     @Inject(SERVICE_RUNNER) private readonly runner: ServiceRunner,
     @Inject(SITE_DEFINITIONS) definitions: SiteDefinition[],
   ) {
-    this.sites = structuredClone(definitions).map((site) => ({
+    this.sites = structuredClone(definitions).map((site, index) => ({
       ...site,
+      priority: index + 1,
+      alwaysOn: false,
       services: site.services.map((service) => ({
         ...service,
         failures: 0,
         manual: false,
+        lastError: null,
+        failureCause: null,
+        quarantine: null,
       })),
     }));
   }
@@ -67,23 +83,7 @@ export class SitesStatusService {
       }
     }
     this.level = level;
-    for (const site of this.sites) {
-      for (const feature of site.features) {
-        feature.enabled = level >= feature.minLevel;
-      }
-      for (const service of site.services) {
-        if (service.manual) continue;
-        const allowed = level >= service.minLevel;
-        if (
-          allowed &&
-          (service.status === 'stopped' || service.status === 'error')
-        ) {
-          await this.launch(site, service);
-        } else if (!allowed && !service.neverAutoStop) {
-          await this.halt(site, service);
-        }
-      }
-    }
+    for (const site of this.sites) await this.applyLevelToSite(site, level);
     return this.getSites();
   }
 
@@ -91,14 +91,71 @@ export class SitesStatusService {
     return this.toSite(this.findSite(siteId));
   }
 
+  async updateSite(siteId: string, body: unknown): Promise<Site[]> {
+    const site = this.findSite(siteId);
+    const settings = this.parseSiteSettings(body);
+    if (settings.alwaysOn !== undefined) {
+      site.alwaysOn = settings.alwaysOn;
+      if (site.alwaysOn && this.level !== null) {
+        await this.applyLevelToSite(site, this.level);
+      }
+    }
+    if (settings.priority !== undefined) {
+      const others = this.sites.filter((s) => s.id !== siteId);
+      others.splice(settings.priority - 1, 0, site);
+      others.forEach((s, index) => (s.priority = index + 1));
+      this.sites.splice(0, this.sites.length, ...others);
+    }
+    return this.getSites();
+  }
+
+  async startSite(siteId: string): Promise<Site> {
+    const site = this.findSite(siteId);
+    for (const service of site.services) {
+      if (service.status === 'quarantine') continue;
+      service.manual = true;
+      if (service.status !== 'active') await this.launch(site, service);
+    }
+    return this.toSite(site);
+  }
+
+  async stopSite(siteId: string): Promise<Site> {
+    const site = this.findSite(siteId);
+    for (const service of site.services) {
+      service.manual = true;
+      await this.halt(site, service);
+    }
+    return this.toSite(site);
+  }
+
+  async restartSite(siteId: string): Promise<Site> {
+    const site = this.findSite(siteId);
+    for (const service of site.services) {
+      await this.relaunch(site, service);
+    }
+    return this.toSite(site);
+  }
+
   async refreshStatuses(): Promise<Site[]> {
     for (const site of this.sites) {
       for (const service of site.services) {
-        if (service.status !== 'active') continue;
+        const watched =
+          service.status === 'active' ||
+          (service.status === 'error' && service.failureCause === 'health');
+        if (!watched) continue;
+        let failure: unknown = null;
         const healthy = await this.runner
           .isHealthy(this.ref(site, service))
-          .catch(() => false);
-        if (!healthy) this.recordFailure(service);
+          .catch((error: unknown) => {
+            failure = error;
+            return false;
+          });
+        if (!healthy) {
+          await this.recordFailure(site, service, 'health', failure);
+        } else if (service.status === 'error') {
+          service.status = 'active';
+          this.clearQuarantine(service);
+        }
       }
     }
     return this.getSites();
@@ -122,7 +179,7 @@ export class SitesStatusService {
     source: StopSource = 'admin',
   ): Promise<Service> {
     const { site, service } = this.find(siteId, serviceId);
-    if (source === 'auto' && service.neverAutoStop) {
+    if (source === 'auto' && (service.neverAutoStop || site.alwaysOn)) {
       throw new ConflictException(
         `Service ${serviceId} must never be stopped automatically`,
       );
@@ -133,12 +190,35 @@ export class SitesStatusService {
 
   async restartService(siteId: string, serviceId: string): Promise<Service> {
     const { site, service } = this.find(siteId, serviceId);
-    if (service.status === 'active' || service.status === 'error') {
-      await this.runner.stop(this.ref(site, service)).catch(() => undefined);
+    return this.relaunch(site, service);
+  }
+
+  getQuarantine(): QuarantinedService[] {
+    return this.sites.flatMap((site) =>
+      site.services
+        .filter((service) => service.quarantine !== null)
+        .map((service) => ({
+          siteId: site.id,
+          siteName: site.name,
+          serviceId: service.id,
+          serviceName: service.name,
+          ...(service.quarantine as QuarantineInfo),
+        })),
+    );
+  }
+
+  releaseService(siteId: string, serviceId: string): Service {
+    const { site, service } = this.find(siteId, serviceId);
+    if (service.status !== 'quarantine') {
+      throw new ConflictException(`Service ${serviceId} is not in quarantine`);
     }
-    service.failures = 0;
+    this.clearQuarantine(service);
+    service.status = 'stopped';
     service.manual = true;
-    return this.launch(site, service);
+    this.logger.log(
+      `Service ${service.id} of site ${site.id} released from quarantine`,
+    );
+    return this.toService(service);
   }
 
   updateSettings(
@@ -162,9 +242,9 @@ export class SitesStatusService {
     try {
       await this.runner.start(this.ref(site, service));
       service.status = 'active';
-      service.failures = 0;
-    } catch {
-      this.recordFailure(service);
+      this.clearQuarantine(service);
+    } catch (error) {
+      await this.recordFailure(site, service, 'start', error);
     }
     return this.toService(service);
   }
@@ -176,15 +256,103 @@ export class SitesStatusService {
     try {
       await this.runner.stop(this.ref(site, service));
       service.status = 'stopped';
-    } catch {
-      this.recordFailure(service);
+    } catch (error) {
+      await this.recordFailure(site, service, 'stop', error);
     }
     return this.toService(service);
   }
 
-  private recordFailure(service: ServiceState): void {
+  private async relaunch(
+    site: SiteState,
+    service: ServiceState,
+  ): Promise<Service> {
+    if (service.status === 'active' || service.status === 'error') {
+      await this.runner.stop(this.ref(site, service)).catch(() => undefined);
+    }
+    this.clearQuarantine(service);
+    service.manual = true;
+    return this.launch(site, service);
+  }
+
+  private async applyLevelToSite(
+    site: SiteState,
+    level: OperatingLevel,
+  ): Promise<void> {
+    for (const feature of site.features) {
+      feature.enabled = level >= feature.minLevel;
+    }
+    for (const service of site.services) {
+      if (service.manual) continue;
+      const allowed = site.alwaysOn || level >= service.minLevel;
+      if (
+        allowed &&
+        (service.status === 'stopped' || service.status === 'error')
+      ) {
+        await this.launch(site, service);
+      } else if (!allowed && !service.neverAutoStop) {
+        await this.halt(site, service);
+      }
+    }
+  }
+
+  private parseSiteSettings(body: unknown): SiteSettings {
+    if (typeof body !== 'object' || body === null) {
+      throw new BadRequestException('Body must be a JSON object');
+    }
+    const { priority, alwaysOn } = body as Record<string, unknown>;
+    if (priority === undefined && alwaysOn === undefined) {
+      throw new BadRequestException('Body must contain priority or alwaysOn');
+    }
+    if (
+      priority !== undefined &&
+      (typeof priority !== 'number' ||
+        !Number.isInteger(priority) ||
+        priority < 1 ||
+        priority > this.sites.length)
+    ) {
+      throw new BadRequestException(
+        `priority must be an integer between 1 and ${this.sites.length}`,
+      );
+    }
+    if (alwaysOn !== undefined && typeof alwaysOn !== 'boolean') {
+      throw new BadRequestException('alwaysOn must be a boolean');
+    }
+    return { priority, alwaysOn };
+  }
+
+  private async recordFailure(
+    site: SiteState,
+    service: ServiceState,
+    cause: QuarantineCause,
+    error: unknown,
+  ): Promise<void> {
     service.failures += 1;
-    service.status = service.failures >= MAX_FAILURES ? 'quarantine' : 'error';
+    service.failureCause = cause;
+    service.lastError =
+      error instanceof Error ? error.message : error ? String(error) : null;
+    if (service.failures < MAX_FAILURES) {
+      service.status = 'error';
+      return;
+    }
+    service.status = 'quarantine';
+    service.quarantine = {
+      cause,
+      detail: service.lastError,
+      failures: service.failures,
+      since: new Date().toISOString(),
+    };
+    await this.runner.stop(this.ref(site, service)).catch(() => undefined);
+    this.logger.warn(
+      `Service ${service.id} of site ${site.id} put in quarantine after ${service.failures} failed ${cause} attempts` +
+        (service.lastError ? `: ${service.lastError}` : ''),
+    );
+  }
+
+  private clearQuarantine(service: ServiceState): void {
+    service.failures = 0;
+    service.lastError = null;
+    service.failureCause = null;
+    service.quarantine = null;
   }
 
   private parseSettings(settings: unknown): ServiceSettings {
@@ -231,7 +399,12 @@ export class SitesStatusService {
   }
 
   private toService(service: ServiceState): Service {
-    const { manual: _manual, ...rest } = service;
+    const {
+      manual: _manual,
+      lastError: _lastError,
+      failureCause: _failureCause,
+      ...rest
+    } = service;
     return { ...rest, active: service.status === 'active' };
   }
 
@@ -240,6 +413,8 @@ export class SitesStatusService {
     return {
       id: site.id,
       name: site.name,
+      priority: site.priority,
+      alwaysOn: site.alwaysOn,
       active: services.some((service) => service.active),
       services,
       features: site.features.map((feature) => ({ ...feature })),

@@ -1,15 +1,12 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
 import { EnergyLevelService } from './energy-level.service.js';
 import { SitesStatusService } from './sites-status.service.js';
-import type { EnergyStatus, Service, Site } from './sites.types.js';
+import type {
+  EnergyStatus,
+  QuarantinedService,
+  Service,
+  Site,
+} from './sites.types.js';
 
 @Controller('sites')
 export class SitesStatusController {
@@ -34,9 +31,41 @@ export class SitesStatusController {
     return this.energyLevelService.refresh();
   }
 
+  @Get('quarantine')
+  getQuarantine(): QuarantinedService[] {
+    return this.sitesStatusService.getQuarantine();
+  }
+
   @Get(':siteId')
   getSite(@Param('siteId') siteId: string): Site {
     return this.sitesStatusService.getSite(siteId);
+  }
+
+  @Post(':siteId/settings')
+  @HttpCode(200)
+  updateSite(
+    @Param('siteId') siteId: string,
+    @Body() body: unknown,
+  ): Promise<Site[]> {
+    return this.sitesStatusService.updateSite(siteId, body);
+  }
+
+  @Post(':siteId/start')
+  @HttpCode(200)
+  startSite(@Param('siteId') siteId: string): Promise<Site> {
+    return this.sitesStatusService.startSite(siteId);
+  }
+
+  @Post(':siteId/stop')
+  @HttpCode(200)
+  stopSite(@Param('siteId') siteId: string): Promise<Site> {
+    return this.sitesStatusService.stopSite(siteId);
+  }
+
+  @Post(':siteId/restart')
+  @HttpCode(200)
+  restartSite(@Param('siteId') siteId: string): Promise<Site> {
+    return this.sitesStatusService.restartSite(siteId);
   }
 
   @Post(':siteId/services/:serviceId/start')
@@ -66,7 +95,17 @@ export class SitesStatusController {
     return this.sitesStatusService.restartService(siteId, serviceId);
   }
 
-  @Patch(':siteId/services/:serviceId')
+  @Post(':siteId/services/:serviceId/release')
+  @HttpCode(200)
+  release(
+    @Param('siteId') siteId: string,
+    @Param('serviceId') serviceId: string,
+  ): Service {
+    return this.sitesStatusService.releaseService(siteId, serviceId);
+  }
+
+  @Post(':siteId/services/:serviceId/settings')
+  @HttpCode(200)
   updateSettings(
     @Param('siteId') siteId: string,
     @Param('serviceId') serviceId: string,
