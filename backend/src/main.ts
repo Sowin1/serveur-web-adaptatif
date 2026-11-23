@@ -18,7 +18,7 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter(),
   );
-  app.setGlobalPrefix('innovants');
+  app.setGlobalPrefix('innovant');
   app.enableCors();
 
   await app.register(cookie);

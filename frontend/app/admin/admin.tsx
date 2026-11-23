@@ -9,13 +9,13 @@ export default function Admin() {
   // Verifiy if the user is log in
   useEffect(() => {
     const checkAuth = async () => {
-        const response = await fetch('/api/auth/admin', {
-          credentials: 'include',
-        });
+      const response = await fetch('/api/auth/admin', {
+        credentials: 'include',
+      });
 
-        if (!response.ok) {
-          router.replace('/login');
-        }
+      if (!response.ok) {
+        router.replace('/login');
+      }
     };
 
     checkAuth();
@@ -23,10 +23,10 @@ export default function Admin() {
 
   // Déconnexion
   const handleLogout = async () => {
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
-      });
+    await fetch('/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+    });
 
       router.push('/login');
   };
