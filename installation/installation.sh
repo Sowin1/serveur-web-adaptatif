@@ -62,3 +62,4 @@ curl -fL https://github.com/Sowin1/serveur-web-adaptatif/archive/refs/heads/main
 # Installation of project deps
 
 pnpm install
+
