@@ -139,6 +139,18 @@ export default function ServicesPage() {
         .map((service) => ({ site, service })),
     ) ?? [];
 
+  const moveSite = (siteId: string, priority: number) =>
+    run(
+      () => updateSite(siteId, { priority }),
+      (current) => {
+        const moved = current.find((s) => s.id === siteId);
+        if (!moved) return current;
+        const others = current.filter((s) => s.id !== siteId);
+        others.splice(priority - 1, 0, moved);
+        return others.map((s, index) => ({ ...s, priority: index + 1 }));
+      },
+    );
+
   const setAlwaysOn = (siteId: string, alwaysOn: boolean) =>
     run(
       () => updateSite(siteId, { alwaysOn }),
@@ -253,9 +265,7 @@ export default function ServicesPage() {
             sites={sites}
             disabled={disabled}
             onOpen={openSite}
-            onMove={(siteId, priority) =>
-              run(() => updateSite(siteId, { priority }))
-            }
+            onMove={moveSite}
             onAlwaysOn={setAlwaysOn}
             onAction={(siteId, action) =>
               run(() => runSiteAction(siteId, action))

@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import type { DragEvent } from 'react';
 import type { Site } from '../_lib/types';
 import { Checkbox, describeSite, SiteActions } from './ui';
 import type { SiteAction } from './ui';
@@ -17,6 +19,40 @@ export function SitesTab({
   onAlwaysOn: (siteId: string, alwaysOn: boolean) => void;
   onAction: (siteId: string, action: SiteAction) => void;
 }) {
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dropIndex, setDropIndex] = useState<number | null>(null);
+
+  const resetDrag = () => {
+    setDraggedId(null);
+    setDropIndex(null);
+  };
+
+  const dragOver = (e: DragEvent<HTMLLIElement>, index: number) => {
+    if (!draggedId) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const rect = e.currentTarget.getBoundingClientRect();
+    const after = e.clientY > rect.top + rect.height / 2;
+    setDropIndex(after ? index + 1 : index);
+  };
+
+  const drop = (e: DragEvent<HTMLLIElement>) => {
+    e.preventDefault();
+    const from = sites.findIndex((s) => s.id === draggedId);
+    if (draggedId && from !== -1 && dropIndex !== null) {
+      const target = dropIndex > from ? dropIndex - 1 : dropIndex;
+      if (target !== from) onMove(draggedId, target + 1);
+    }
+    resetDrag();
+  };
+
+  const fromIndex = sites.findIndex((s) => s.id === draggedId);
+  const showDrop =
+    dropIndex !== null &&
+    fromIndex !== -1 &&
+    dropIndex !== fromIndex &&
+    dropIndex !== fromIndex + 1;
+
   if (sites.length === 0) {
     return (
       <p className="mt-8 text-neutral-500">
@@ -29,7 +65,8 @@ export function SitesTab({
     <>
       <p className="mt-8 text-sm text-neutral-500">
         Les sites sont classés par priorité. Quand l’énergie baisse, les
-        premiers sont les derniers à être éteints.
+        premiers sont les derniers à être éteints. Glissez un site pour changer
+        sa place.
       </p>
       <ul className="mt-4 divide-y divide-neutral-200 border-y border-neutral-200">
         {sites.map((site, index) => {
@@ -41,9 +78,35 @@ export function SitesTab({
             <li
               key={site.id}
               data-testid={`site-${site.id}`}
-              className="flex flex-wrap items-start gap-x-6 gap-y-4 py-5"
+              draggable={!disabled}
+              onDragStart={(e) => {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', site.id);
+                setDraggedId(site.id);
+              }}
+              onDragOver={(e) => dragOver(e, index)}
+              onDrop={drop}
+              onDragEnd={resetDrag}
+              className={`flex flex-wrap items-start gap-x-6 gap-y-4 py-5 ${
+                draggedId === site.id ? 'opacity-40' : ''
+              } ${
+                showDrop && dropIndex === index
+                  ? 'shadow-[inset_0_2px_0_0_#404040]'
+                  : showDrop &&
+                      dropIndex === index + 1 &&
+                      index === sites.length - 1
+                    ? 'shadow-[inset_0_-2px_0_0_#404040]'
+                    : ''
+              } ${disabled ? '' : 'cursor-grab active:cursor-grabbing'}`}
             >
               <div className="flex w-10 flex-col items-center">
+                <span
+                  aria-hidden="true"
+                  title="Glisser pour changer la priorité"
+                  className="text-xs leading-none text-neutral-300"
+                >
+                  ⋮⋮
+                </span>
                 <span className="text-2xl font-light tabular-nums text-neutral-400">
                   {site.priority}
                 </span>
