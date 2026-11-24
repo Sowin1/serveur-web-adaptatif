@@ -24,6 +24,7 @@ import type {
   StopSource,
 } from './sites.types.js';
 
+/** Number of failures in a row that puts a service in quarantine. */
 export const MAX_FAILURES = 3;
 
 interface ServiceState extends ServiceDefinition {
@@ -43,6 +44,10 @@ interface SiteState {
   features: Feature[];
 }
 
+/**
+ * Keeps the state of the sites and services in memory and handles every
+ * action on them: start, stop, priority, energy level and quarantine.
+ */
 @Injectable()
 export class SitesStatusService {
   private readonly logger = new Logger(SitesStatusService.name);
@@ -68,14 +73,21 @@ export class SitesStatusService {
     }));
   }
 
+  /** Returns every site, sorted by priority. */
   getSites(): Site[] {
     return this.sites.map((site) => this.toSite(site));
   }
 
+  /** Returns the last operating level applied, or null if none yet. */
   getLevel(): OperatingLevel | null {
     return this.level;
   }
 
+  /**
+   * Applies an operating level to every site: starts the allowed services,
+   * stops the others and enables or disables the features.
+   * Admin decisions are kept until the level changes.
+   */
   async applyLevel(level: OperatingLevel): Promise<Site[]> {
     if (level !== this.level) {
       for (const site of this.sites) {
@@ -87,10 +99,15 @@ export class SitesStatusService {
     return this.getSites();
   }
 
+  /** Returns one site. Throws 404 if it does not exist. */
   getSite(siteId: string): Site {
     return this.toSite(this.findSite(siteId));
   }
 
+  /**
+   * Changes the priority and/or the alwaysOn setting of a site.
+   * @param body { priority?: number, alwaysOn?: boolean }
+   */
   async updateSite(siteId: string, body: unknown): Promise<Site[]> {
     const site = this.findSite(siteId);
     const settings = this.parseSiteSettings(body);
@@ -109,6 +126,7 @@ export class SitesStatusService {
     return this.getSites();
   }
 
+  /** Starts every service of a site, except the ones in quarantine. */
   async startSite(siteId: string): Promise<Site> {
     const site = this.findSite(siteId);
     for (const service of site.services) {
@@ -119,6 +137,7 @@ export class SitesStatusService {
     return this.toSite(site);
   }
 
+  /** Stops every service of a site, protected ones included (admin action). */
   async stopSite(siteId: string): Promise<Site> {
     const site = this.findSite(siteId);
     for (const service of site.services) {
@@ -128,6 +147,7 @@ export class SitesStatusService {
     return this.toSite(site);
   }
 
+  /** Restarts every service of a site, quarantined ones included. */
   async restartSite(siteId: string): Promise<Site> {
     const site = this.findSite(siteId);
     for (const service of site.services) {
@@ -136,6 +156,10 @@ export class SitesStatusService {
     return this.toSite(site);
   }
 
+  /**
+   * Runs a health check on running services (and on services in error after
+   * a failed check). A service that answers again goes back to active.
+   */
   async refreshStatuses(): Promise<Site[]> {
     for (const site of this.sites) {
       for (const service of site.services) {
@@ -161,6 +185,7 @@ export class SitesStatusService {
     return this.getSites();
   }
 
+  /** Starts a service. Throws 409 if it is in quarantine. */
   async startService(siteId: string, serviceId: string): Promise<Service> {
     const { site, service } = this.find(siteId, serviceId);
     if (service.status === 'quarantine') {
@@ -173,6 +198,10 @@ export class SitesStatusService {
     return this.launch(site, service);
   }
 
+  /**
+   * Stops a service.
+   * @param source 'auto' is refused (409) on protected services and alwaysOn sites
+   */
   async stopService(
     siteId: string,
     serviceId: string,
@@ -188,11 +217,13 @@ export class SitesStatusService {
     return this.halt(site, service);
   }
 
+  /** Restarts a service and takes it out of quarantine. */
   async restartService(siteId: string, serviceId: string): Promise<Service> {
     const { site, service } = this.find(siteId, serviceId);
     return this.relaunch(site, service);
   }
 
+  /** Lists every service currently in quarantine, with the reason. */
   getQuarantine(): QuarantinedService[] {
     return this.sites.flatMap((site) =>
       site.services
@@ -207,6 +238,10 @@ export class SitesStatusService {
     );
   }
 
+  /**
+   * Puts a service in quarantine by hand and stops it.
+   * @param body { reason?: string } (200 characters max)
+   */
   async quarantineService(
     siteId: string,
     serviceId: string,
@@ -223,6 +258,10 @@ export class SitesStatusService {
     return this.toService(service);
   }
 
+  /**
+   * Puts every service of a site in quarantine by hand.
+   * @param body { reason?: string } (200 characters max)
+   */
   async quarantineSite(siteId: string, body?: unknown): Promise<Site> {
     const site = this.findSite(siteId);
     const reason = this.parseReason(body);
@@ -238,6 +277,7 @@ export class SitesStatusService {
     return this.toSite(site);
   }
 
+  /** Takes every quarantined service of a site out of quarantine. */
   releaseSite(siteId: string): Site {
     const site = this.findSite(siteId);
     const targets = site.services.filter((s) => s.status === 'quarantine');
@@ -250,6 +290,10 @@ export class SitesStatusService {
     return this.toSite(site);
   }
 
+  /**
+   * Takes a service out of quarantine. It stays stopped until the admin
+   * starts it or the energy level changes.
+   */
   releaseService(siteId: string, serviceId: string): Service {
     const { site, service } = this.find(siteId, serviceId);
     if (service.status !== 'quarantine') {
@@ -264,6 +308,10 @@ export class SitesStatusService {
     return this.toService(service);
   }
 
+  /**
+   * Changes the priority and/or neverAutoStop flags of a service.
+   * @param settings { priority?: boolean, neverAutoStop?: boolean }
+   */
   updateSettings(
     siteId: string,
     serviceId: string,
@@ -278,6 +326,7 @@ export class SitesStatusService {
     return this.toService(service);
   }
 
+  /** Starts a service through the runner and records a failure if it fails. */
   private async launch(
     site: SiteState,
     service: ServiceState,
@@ -292,6 +341,7 @@ export class SitesStatusService {
     return this.toService(service);
   }
 
+  /** Stops a service through the runner and records a failure if it fails. */
   private async halt(site: SiteState, service: ServiceState): Promise<Service> {
     if (service.status === 'stopped' || service.status === 'quarantine') {
       return this.toService(service);
@@ -305,6 +355,7 @@ export class SitesStatusService {
     return this.toService(service);
   }
 
+  /** Stops (if needed) then starts a service, clearing its quarantine first. */
   private async relaunch(
     site: SiteState,
     service: ServiceState,
@@ -317,6 +368,7 @@ export class SitesStatusService {
     return this.launch(site, service);
   }
 
+  /** Applies an operating level to a single site (see applyLevel). */
   private async applyLevelToSite(
     site: SiteState,
     level: OperatingLevel,
@@ -338,6 +390,7 @@ export class SitesStatusService {
     }
   }
 
+  /** Validates the body of updateSite. Throws 400 if it is invalid. */
   private parseSiteSettings(body: unknown): SiteSettings {
     if (typeof body !== 'object' || body === null) {
       throw new BadRequestException('Body must be a JSON object');
@@ -363,6 +416,10 @@ export class SitesStatusService {
     return { priority, alwaysOn };
   }
 
+  /**
+   * Counts a failure: the service goes to error, then to quarantine
+   * after MAX_FAILURES failures in a row.
+   */
   private async recordFailure(
     site: SiteState,
     service: ServiceState,
@@ -380,6 +437,7 @@ export class SitesStatusService {
     await this.putInQuarantine(site, service, cause, service.lastError);
   }
 
+  /** Puts a service in quarantine, saves the reason, stops it and logs a warning. */
   private async putInQuarantine(
     site: SiteState,
     service: ServiceState,
@@ -404,6 +462,7 @@ export class SitesStatusService {
     );
   }
 
+  /** Reads the optional quarantine reason. Throws 400 if it is invalid. */
   private parseReason(body: unknown): string | null {
     if (body === undefined || body === null || body === '') return null;
     if (typeof body !== 'object') {
@@ -419,6 +478,7 @@ export class SitesStatusService {
     return reason.trim() || null;
   }
 
+  /** Resets the failure count and removes the quarantine information. */
   private clearQuarantine(service: ServiceState): void {
     service.failures = 0;
     service.lastError = null;
@@ -426,6 +486,7 @@ export class SitesStatusService {
     service.quarantine = null;
   }
 
+  /** Validates the body of updateSettings. Throws 400 if it is invalid. */
   private parseSettings(settings: unknown): ServiceSettings {
     if (typeof settings !== 'object' || settings === null) {
       throw new BadRequestException('Body must be a JSON object');
@@ -445,12 +506,14 @@ export class SitesStatusService {
     return { priority, neverAutoStop };
   }
 
+  /** Finds a site or throws 404. */
   private findSite(siteId: string): SiteState {
     const site = this.sites.find((s) => s.id === siteId);
     if (!site) throw new NotFoundException(`Site ${siteId} not found`);
     return site;
   }
 
+  /** Finds a service of a site or throws 404. */
   private find(
     siteId: string,
     serviceId: string,
@@ -469,6 +532,7 @@ export class SitesStatusService {
     return { siteId: site.id, serviceId: service.id, route: service.route };
   }
 
+  /** Converts the internal state to the API format (hides internal fields). */
   private toService(service: ServiceState): Service {
     const {
       manual: _manual,
@@ -479,6 +543,7 @@ export class SitesStatusService {
     return { ...rest, active: service.status === 'active' };
   }
 
+  /** Converts a site to the API format. A site is active if one service runs. */
   private toSite(site: SiteState): Site {
     const services = site.services.map((service) => this.toService(service));
     return {
