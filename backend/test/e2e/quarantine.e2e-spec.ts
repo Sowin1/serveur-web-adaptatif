@@ -152,6 +152,23 @@ describe('Quarantine', () => {
     });
   });
 
+  it(`Quarantine, the admin should release the service`, () => {
+    return action('portail/services/galerie/release').then((result) => {
+      expect(result.statusCode).toEqual(200);
+      expect(result.json().status).toEqual('stopped');
+      expect(result.json().failures).toEqual(0);
+      expect(result.json().quarantine).toBeNull();
+    });
+  });
+
+  it(`Quarantine, the list should be empty after the release`, () => {
+    return app
+      .inject({ method: 'GET', url: '/sites/quarantine' })
+      .then((result) => {
+        expect(result.json()).toEqual([]);
+      });
+  });
+
   it(`Quarantine, the released service should start again`, () => {
     return action('portail/services/galerie/start').then((result) => {
       expect(result.json().status).toEqual('active');
@@ -173,6 +190,135 @@ describe('Quarantine', () => {
     const service = await getService('blog', 'commentaires');
     expect(service.status).toEqual('active');
     expect(service.failures).toEqual(0);
+  });
+
+  it(`Quarantine, a service failing its health check 3 times should be put in quarantine`, async () => {
+    stops.length = 0;
+    unhealthy.add('blog/articles');
+    for (let i = 0; i < 3; i++) {
+      await app.inject({ method: 'GET', url: '/sites/status' });
+    }
+    const service = await getService('blog', 'articles');
+    expect(service.status).toEqual('quarantine');
+    expect(service.quarantine.cause).toEqual('health');
+    expect(stops).toContain('blog/articles');
+  });
+
+  it(`Quarantine, restart should also take the service out of quarantine`, async () => {
+    const result = await action('blog/services/articles/restart');
+    expect(result.json().status).toEqual('active');
+    expect(result.json().quarantine).toBeNull();
+  });
+
+  it(`Manual quarantine, the admin should put a service in quarantine with a reason`, async () => {
+    stops.length = 0;
+    const result = await app.inject({
+      method: 'POST',
+      url: '/sites/blog/services/commentaires/quarantine',
+      headers: { 'content-type': 'application/json' },
+      body: { reason: 'spam en cours' },
+    });
+    expect(result.statusCode).toEqual(200);
+    const service = result.json();
+    expect(service.status).toEqual('quarantine');
+    expect(service.quarantine.cause).toEqual('manual');
+    expect(service.quarantine.detail).toEqual('spam en cours');
+    expect(stops).toContain('blog/commentaires');
+  });
+
+  it(`Manual quarantine, it should appear in the quarantine list`, () => {
+    return app
+      .inject({ method: 'GET', url: '/sites/quarantine' })
+      .then((result) => {
+        const entry = result
+          .json()
+          .find((item: any) => item.serviceId === 'commentaires');
+        expect(entry.cause).toEqual('manual');
+      });
+  });
+
+  it(`Manual quarantine, the service should not be restarted by the energy level`, async () => {
+    await action('level/refresh');
+    expect((await getService('blog', 'commentaires')).status).toEqual(
+      'quarantine',
+    );
+  });
+
+  it(`Manual quarantine, a service already in quarantine should return 409`, () => {
+    return action('blog/services/commentaires/quarantine').then((result) => {
+      expect(result.statusCode).toEqual(409);
+    });
+  });
+
+  it(`Manual quarantine, the reason should be optional`, async () => {
+    const result = await action('blog/services/articles/quarantine');
+    expect(result.statusCode).toEqual(200);
+    expect(result.json().quarantine.cause).toEqual('manual');
+    expect(result.json().quarantine.detail).toBeNull();
+    await action('blog/services/articles/release');
+  });
+
+  it(`Manual quarantine, an invalid reason should return 400`, async () => {
+    for (const reason of [42, 'x'.repeat(201)]) {
+      const result = await app.inject({
+        method: 'POST',
+        url: '/sites/blog/services/articles/quarantine',
+        headers: { 'content-type': 'application/json' },
+        body: { reason },
+      });
+      expect(result.statusCode).toEqual(400);
+    }
+  });
+
+  it(`Manual quarantine, the admin should put a whole site in quarantine`, async () => {
+    const result = await app.inject({
+      method: 'POST',
+      url: '/sites/blog/quarantine',
+      headers: { 'content-type': 'application/json' },
+      body: { reason: 'maintenance' },
+    });
+    expect(result.statusCode).toEqual(200);
+    const site = result.json();
+    expect(site.active).toBe(false);
+    for (const service of site.services) {
+      expect(service.status).toEqual('quarantine');
+    }
+    const articles = site.services.find((s: any) => s.id === 'articles');
+    expect(articles.quarantine.detail).toEqual('maintenance');
+    const comments = site.services.find((s: any) => s.id === 'commentaires');
+    expect(comments.quarantine.detail).toEqual('spam en cours');
+  });
+
+  it(`Manual quarantine, a site fully in quarantine should return 409`, () => {
+    return action('blog/quarantine').then((result) => {
+      expect(result.statusCode).toEqual(409);
+    });
+  });
+
+  it(`Manual quarantine, the admin should take a whole site out of quarantine`, async () => {
+    const result = await action('blog/release');
+    expect(result.statusCode).toEqual(200);
+    for (const service of result.json().services) {
+      expect(service.status).toEqual('stopped');
+      expect(service.quarantine).toBeNull();
+    }
+    const list = await app.inject({ method: 'GET', url: '/sites/quarantine' });
+    expect(
+      list.json().filter((item: any) => item.siteId === 'blog'),
+    ).toHaveLength(0);
+  });
+
+  it(`Manual quarantine, releasing a site without quarantine should return 409`, () => {
+    return action('blog/release').then((result) => {
+      expect(result.statusCode).toEqual(409);
+    });
+  });
+
+  it(`Manual quarantine, an unknown site or service should return 404`, async () => {
+    expect((await action('unknown/quarantine')).statusCode).toEqual(404);
+    expect(
+      (await action('blog/services/unknown/quarantine')).statusCode,
+    ).toEqual(404);
   });
 
   afterAll(async () => {
