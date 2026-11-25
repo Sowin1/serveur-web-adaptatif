@@ -41,7 +41,7 @@
 <script>
   const form = document.getElementById("installationForm");
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(form));
 
@@ -74,27 +74,25 @@
     if(!authProjectSecret?.trim()) return false;
     if(!adminPanelPassword?.trim()) return false;
 
-    // Write file
+    const submitButton = form.querySelector('input[type="submit"]');
+    submitButton.disabled = true;
 
-    const envFile = new File([
-      `ENODE_URL="https://sandbox.api.enode.com"
-ENODE_TOKEN_URL="https://oauth.sandbox.enode.io/oauth2/token"
-ENODE_CLIENT_ID="${enodeClientId}"
-ENODE_CLIENT_SECRET="${enodeClientSecret}"
+    try {
+      const response = await fetch("/configure", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
 
-AUTH_BATTERY="${authBattery}"
-AUTH_BATTERY_PASS="${passwordAuthBattery}"
-JWT_SECRET="${authBatterySecret}"
+      if (!response.ok) throw new Error(await response.text());
 
-AUTH_PROJECT="${authProject}"
-AUTH_PROJECT_PASS="${passwordAuthProject}"
-JWT_SECRET_PROJECT="${authProjectSecret}"
-
-ADMIN_PASSWORD="${adminPanelPassword}"
-`
-    ], ".env", { type: "text/plain" });
-
-
+      form.replaceWith(document.createTextNode(
+        "Configuration enregistrée. L'installation se poursuit dans le terminal."
+      ));
+    } catch (error) {
+      alert(`Échec de la configuration : ${error.message}`);
+      submitButton.disabled = false;
+    }
   });
 </script>
 

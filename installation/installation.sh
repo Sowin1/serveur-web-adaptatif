@@ -53,13 +53,23 @@ apt install nginx -y
 
 # Retrieve project
 
-curl -fL https://github.com/Sowin1/serveur-web-adaptatif/archive/refs/heads/main.zip -o /tmp/srv-projet.zip \
+BRANCH="feat/installScript"
+
+curl -fL "https://github.com/Sowin1/serveur-web-adaptatif/archive/refs/heads/${BRANCH}.zip" -o /tmp/srv-projet.zip \
   && unzip -q /tmp/srv-projet.zip \
-  && mv serveur-web-adaptatif-main serveur-web-adaptatif \
+  && mv "serveur-web-adaptatif-${BRANCH//\//-}" serveur-web-adaptatif \
   && rm /tmp/srv-projet.zip \
-  && cd serveur-web-adaptatif
+  && cd serveur-web-adaptatif \
+  && pnpm install
 
 # Installation of project deps
 
-pnpm install
+mv installation/ ../
+cd ..
 
+export PROJECT_DIR="$(pwd)/serveur-web-adaptatif"
+export INSTALLATION_DIR="$(pwd)/installation"
+
+node "$INSTALLATION_DIR/installServer.mjs"
+
+bash "$INSTALLATION_DIR/initInstall.sh"
