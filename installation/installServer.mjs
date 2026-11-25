@@ -74,5 +74,5 @@ ADMIN_PASSWORD=${quote(data.admin_panel)}
 });
 
 server.listen(port, host, () => {
-  console.log(`Ouvrez http://${host}:${port} dans votre navigateur.`);
+  console.log(`Ouvrez http://${host}:${port} dans votre navigateur`);
 });

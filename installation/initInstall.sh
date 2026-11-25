@@ -111,7 +111,7 @@ systemctl reload nginx
 rm -rf installation/ \
     installation.sh
 
-cd serveur-web-adapatif/
+cd && cd serveur-web-adaptatif/
 
 rm -rf backend/src \
        backend/test \

@@ -3,12 +3,12 @@ set -Eeuo pipefail
 
 # Vérification des droits
 if [[ $EUID -ne 0 ]]; then
-    echo "Erreur : exécutez ce script avec sudo."
+    echo "Erreur : exécutez ce script avec sudo"
     exit 1
 fi
 
 if [[ ! -f /etc/os-release ]]; then
-    echo "Système non reconnu."
+    echo "Système non reconnu"
     exit 1
 fi
 
