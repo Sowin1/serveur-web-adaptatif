@@ -105,3 +105,32 @@ rm -f /etc/nginx/sites-enabled/default
 nginx -t
 systemctl enable --now nginx
 systemctl reload nginx
+<<<<<<< HEAD
+=======
+
+# Cleaning
+
+rm -rf installation/ \
+    installation.sh
+
+cd serveur-web-adapatif/
+
+rm -rf backend/src \
+       backend/test \
+       backend/nest-cli.json \
+       backend/playwright.config.ts \
+       backend/tsconfig.build.json \
+       backend/tsconfig.build.tsbuildinfo \
+       backend/tsconfig.json \
+       backend/vitest.config.e2e.ts \
+       backend/vitest.config.ts
+
+rm -rf frontend/app \
+       frontend/component \
+       frontend/AGENTS.md \
+       frontend/CLAUDE.md \
+       frontend/README.md \
+       frontend/eslint.config.mjs \
+       frontend/postcss.config.mjs \
+       frontend/next-env.d.ts
+>>>>>>> 1b1b4a6 (feat: installation crash)
