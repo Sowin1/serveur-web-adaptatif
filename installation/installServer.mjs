@@ -74,9 +74,5 @@ ADMIN_PASSWORD=${quote(data.admin_panel)}
 });
 
 server.listen(port, host, () => {
-<<<<<<< HEAD
   console.log(`Ouvrez http://${host}:${port} dans votre navigateur.`);
-=======
-  console.log(`Ouvrez http://${host}:${port} dans votre navigateur`);
->>>>>>> 1b1b4a6 (feat: installation crash)
 });

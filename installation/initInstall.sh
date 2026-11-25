@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 if [[ $EUID -ne 0 ]]; then
-    echo "Erreur : initInstall.sh doit être lancé par installation.sh avec sudo."
+    echo "Erreur : initInstall.sh doit être lancé par installation.sh avec sudo"
     exit 1
 fi
 
@@ -68,7 +68,7 @@ systemctl restart backend frontend
 
 # Configure Nginx reverse proxy
 
-tee /etc/nginx/sites-available/sowin > /dev/null <<'EOF'
+tee /etc/nginx/sites-available/$USER > /dev/null <<'EOF'
 server {
     listen 80;
     server_name _;
@@ -97,16 +97,14 @@ EOF
 
 # Enable Nginx configuration
 
-ln -sfn /etc/nginx/sites-available/sowin \
-    /etc/nginx/sites-enabled/sowin
+ln -sfn /etc/nginx/sites-available/$USER \
+    /etc/nginx/sites-enabled/$USER
 
 rm -f /etc/nginx/sites-enabled/default
 
 nginx -t
 systemctl enable --now nginx
 systemctl reload nginx
-<<<<<<< HEAD
-=======
 
 # Cleaning
 
@@ -133,4 +131,3 @@ rm -rf frontend/app \
        frontend/eslint.config.mjs \
        frontend/postcss.config.mjs \
        frontend/next-env.d.ts
->>>>>>> 1b1b4a6 (feat: installation crash)
