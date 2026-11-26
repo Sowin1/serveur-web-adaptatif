@@ -8,6 +8,10 @@ import { SitesStatusController } from './sites-status.controller.js';
 import { SitesStatusService } from './sites-status.service.js';
 import { SITE_DEFINITIONS, SITES } from './sites.data.js';
 
+/**
+ * Sites and services module. Exports SitesStatusService and EnergyLevelService
+ * so other modules (arbitration, cache...) can use them.
+ */
 @Module({
   imports: [HttpModule],
   controllers: [SitesStatusController],

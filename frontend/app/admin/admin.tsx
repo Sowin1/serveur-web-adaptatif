@@ -28,7 +28,7 @@ export default function Admin() {
       credentials: 'include',
     });
 
-      router.push('/login');
+    router.push('/login');
   };
 
   return (
