@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Server initialisation</title>
+</head>
+<body>
+
+<h1>Welcome</h1>
+
+<form id="installationForm" method="POST" style="border-color: aqua;">
+  <label>
+    <h3>ENode</h3>
+    <input type="password" name="e_id" placeholder="ENODE CLIENT ID" required>
+    <input type="password" name="e_secret" placeholder="ENODE CLIENT SECRET" required>
+  </label>
+
+  <label>
+    <h3>Auth battery</h3>
+    <input type="password" name="auth_battery" placeholder="AUTH BATTERY" required>
+    <input type="password" name="auth_battery_pass" placeholder="AUTH BATTERY PASS" required>
+    <input type="password" name="auth_battery_secret" placeholder="JWT SECRET BATTERY" required>
+  </label>
+
+  <label>
+    <h3>Auth project</h3>
+    <input type="password" name="auth_project" placeholder="AUTH PROJECT" required>
+    <input type="password" name="auth_project_pass" placeholder="AUTH PROJECT PASS" required>
+    <input type="password" name="auth_project_secret" placeholder="JWT SECRET PROJECT" required>
+  </label>
+
+  <label>
+    <h3>Admin panel</h3>
+    <input type="password" name="admin_panel" placeholder="Admin password" required>
+  </label>
+  <div style="margin: 3rem"></div>
+  <input type="submit" value="Run the configuration" >
+</form>
+
+<script>
+  const form = document.getElementById("installationForm");
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(form));
+
+    // Store form
+
+    const enodeClientId = data.e_id;
+    const enodeClientSecret = data.e_secret;
+    const authBattery = data.auth_battery;
+    const passwordAuthBattery = data.auth_battery_pass;
+    const authBatterySecret = data.auth_battery_secret;
+    const authProject = data.auth_project;
+    const passwordAuthProject = data.auth_project_pass;
+    const authProjectSecret = data.auth_project_secret;
+    const adminPanelPassword = data.admin_panel;
+
+    // Password verification
+
+    if( !passwordAuthBattery?.trim() && passwordAuthBattery.startsWith("$argon2id$v=19$m=65536")) return true;
+    if( !passwordAuthProject?.trim() && passwordAuthProject.startsWith("$argon2id$v=19$m=65536")) return true
+
+    // Constant verification
+
+    if(!enodeClientId?.trim()) return false;
+    if(!enodeClientSecret?.trim()) return false;
+    if(!authBattery?.trim()) return false;
+    if(!passwordAuthBattery?.trim()) return false;
+    if(!authBatterySecret?.trim()) return false;
+    if(!authProject?.trim()) return false;
+    if(!passwordAuthProject?.trim()) return false;
+    if(!authProjectSecret?.trim()) return false;
+    if(!adminPanelPassword?.trim()) return false;
+
+    const submitButton = form.querySelector('input[type="submit"]');
+    submitButton.disabled = true;
+
+    try {
+      const response = await fetch("/configure", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error(await response.text());
+
+      form.replaceWith(document.createTextNode(
+        "Configuration enregistrée. L'installation se poursuit dans le terminal."
+      ));
+    } catch (error) {
+      alert(`Échec de la configuration : ${error.message}`);
+      submitButton.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup pnpm & install
         run: |
@@ -57,16 +57,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup pnpm & install
         run: |
           corepack enable
           corepack prepare pnpm@12.6.0 --activate
           pnpm install --frozen-lockfile --prefer-offline
 
-      - name: Run .env creating
-        uses: ./.github/actions/env-action
-        with:
+      - name: End 2 End test
+        env:
           ENODE_URL: ${{ vars.ENODE_URL }}
           ENODE_TOKEN_URL: ${{ vars.ENODE_TOKEN_URL }}
           ENODE_CLIENT_ID: ${{ vars.ENODE_CLIENT_ID }}
@@ -75,13 +74,8 @@ jobs:
           ENODE_CLIENT_SECRET: ${{ secrets.ENODE_CLIENT_SECRET }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
-
-#      - name: Unit test
-#        run: pnpm --filter backend test
-
-      - name: End 2 End test
         run: pnpm --filter backend test:e2e
-
+      
       - name: Cleanup workspace
         if: always()
         run: |
@@ -99,7 +93,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup pnpm & install
         run: |

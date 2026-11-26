@@ -12,7 +12,7 @@ import { SitesStatusModule } from './sites-status/sites-status.module.js';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '../.env',
+      envFilePath: ['../.env', '.env'],
     }),
     AuthModule,
     HttpModule,
