@@ -90,7 +90,7 @@ export const MOCK_SITES: Site[] = [
       },
       {
         id: 'commentaires',
-        name: 'Commentaires',
+        name: 'Comments',
         route: '/api/commentaires',
         status: 'active',
         active: true,

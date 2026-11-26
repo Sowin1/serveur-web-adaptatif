@@ -39,7 +39,7 @@ describe('Sites status', () => {
     await refreshLevel();
   });
 
-  it(`Sites status, should return a list of sites`, () => {
+  it('Sites status, should return a list of sites', () => {
     return app
       .inject({
         method: 'GET',
@@ -54,18 +54,17 @@ describe('Sites status', () => {
       });
   });
 
-  it(`Sites status, each site should have services and features`, () => {
+  it('Sites status, each site should have services and features', () => {
     for (const site of sites) {
       expect(site.id).toBeDefined();
       expect(site.name).toBeDefined();
       expect(typeof site.active).toBe('boolean');
-      expect(typeof site.alwaysOn).toBe('boolean');
       expect(Array.isArray(site.services)).toBe(true);
       expect(Array.isArray(site.features)).toBe(true);
     }
   });
 
-  it(`Sites status, each feature should be enabled or disabled`, () => {
+  it('Sites status, each feature should be enabled or disabled', () => {
     for (const site of sites) {
       for (const feature of site.features) {
         expect(feature.name).toBeDefined();
@@ -74,7 +73,7 @@ describe('Sites status', () => {
     }
   });
 
-  it(`Sites status, each service should have a status and settings`, () => {
+  it('Sites status, each service should have a status and settings', () => {
     for (const site of sites) {
       for (const service of site.services) {
         expect(service.name).toBeDefined();
@@ -88,7 +87,7 @@ describe('Sites status', () => {
     }
   });
 
-  it(`Sites status, an offline site should have no active service`, () => {
+  it('Sites status, an offline site should have no active service', () => {
     const offlineSites = sites.filter((site) => !site.active);
     for (const site of offlineSites) {
       const activeServices = site.services.filter(
@@ -98,7 +97,7 @@ describe('Sites status', () => {
     }
   });
 
-  it(`Sites status, an online site should have at least one active service`, () => {
+  it('Sites status, an online site should have at least one active service', () => {
     const onlineSites = sites.filter((site) => site.active);
     for (const site of onlineSites) {
       const activeServices = site.services.filter(
@@ -108,20 +107,20 @@ describe('Sites status', () => {
     }
   });
 
-  it(`Sites status, POST should not exist`, () => {
+  it('Sites status, POST should not exist', () => {
     return action('status').then((result) => {
       expect(result.statusCode).toEqual(404);
     });
   });
 
-  it(`Site, should return a single site`, () => {
+  it('Site, should return a single site', () => {
     return app.inject({ method: 'GET', url: '/sites/blog' }).then((result) => {
       expect(result.statusCode).toEqual(200);
       expect(result.json().id).toEqual('blog');
     });
   });
 
-  it(`Site, unknown site should return 404`, () => {
+  it('Site, unknown site should return 404', () => {
     return app
       .inject({ method: 'GET', url: '/sites/unknown' })
       .then((result) => {
@@ -129,7 +128,7 @@ describe('Sites status', () => {
       });
   });
 
-  it(`Service, should start a stopped service`, () => {
+  it('Service, should start a stopped service', () => {
     return action('portail/services/galerie/start').then((result) => {
       expect(result.statusCode).toEqual(200);
       expect(result.json().status).toEqual('active');
@@ -137,7 +136,7 @@ describe('Sites status', () => {
     });
   });
 
-  it(`Service, should stop an active service`, () => {
+  it('Service, should stop an active service', () => {
     return action('portail/services/galerie/stop').then((result) => {
       expect(result.statusCode).toEqual(200);
       expect(result.json().status).toEqual('stopped');
@@ -145,14 +144,14 @@ describe('Sites status', () => {
     });
   });
 
-  it(`Service, should restart a service`, () => {
+  it('Service, should restart a service', () => {
     return action('blog/services/articles/restart').then((result) => {
       expect(result.statusCode).toEqual(200);
       expect(result.json().status).toEqual('active');
     });
   });
 
-  it(`Service, the new state should be visible in the list`, async () => {
+  it('Service, the new state should be visible in the list', async () => {
     await action('blog/services/commentaires/stop');
     const result = await app.inject({ method: 'GET', url: '/sites/status' });
     const blog = result.json().find((site: any) => site.id === 'blog');
@@ -162,7 +161,7 @@ describe('Sites status', () => {
     expect(comments.status).toEqual('stopped');
   });
 
-  it(`Service, the site should be inactive when all its services are stopped`, async () => {
+  it('Service, the site should be inactive when all its services are stopped', async () => {
     await action('blog/services/articles/stop');
     await action('blog/services/commentaires/stop');
     const result = await app.inject({ method: 'GET', url: '/sites/blog' });
@@ -171,23 +170,23 @@ describe('Sites status', () => {
     await action('blog/services/commentaires/start');
   });
 
-  it(`Service, unknown service should return 404`, () => {
+  it('Service, unknown service should return 404', () => {
     return action('blog/services/unknown/start').then((result) => {
       expect(result.statusCode).toEqual(404);
     });
   });
 
-  it(`Service, unknown action should return 404`, () => {
+  it('Service, unknown action should return 404', () => {
     return action('blog/services/articles/pause').then((result) => {
       expect(result.statusCode).toEqual(404);
     });
   });
 
-  it(`Settings, admin should define a priority service`, () => {
+  it('Settings, admin should define a priority service', () => {
     return app
       .inject({
-        method: 'POST',
-        url: '/sites/blog/services/articles/settings',
+        method: 'PATCH',
+        url: '/sites/blog/services/articles',
         headers: { 'content-type': 'application/json' },
         body: { priority: true },
       })
@@ -197,11 +196,11 @@ describe('Sites status', () => {
       });
   });
 
-  it(`Settings, admin should define a service never stopped automatically`, () => {
+  it('Settings, admin should define a service never stopped automatically', () => {
     return app
       .inject({
-        method: 'POST',
-        url: '/sites/blog/services/articles/settings',
+        method: 'PATCH',
+        url: '/sites/blog/services/articles',
         headers: { 'content-type': 'application/json' },
         body: { neverAutoStop: true },
       })
@@ -212,11 +211,11 @@ describe('Sites status', () => {
       });
   });
 
-  it(`Settings, invalid body should return 400`, () => {
+  it('Settings, invalid body should return 400', () => {
     return app
       .inject({
-        method: 'POST',
-        url: '/sites/blog/services/articles/settings',
+        method: 'PATCH',
+        url: '/sites/blog/services/articles',
         headers: { 'content-type': 'application/json' },
         body: { priority: 'yes' },
       })
@@ -225,11 +224,11 @@ describe('Sites status', () => {
       });
   });
 
-  it(`Settings, empty body should return 400`, () => {
+  it('Settings, empty body should return 400', () => {
     return app
       .inject({
-        method: 'POST',
-        url: '/sites/blog/services/articles/settings',
+        method: 'PATCH',
+        url: '/sites/blog/services/articles',
         headers: { 'content-type': 'application/json' },
         body: {},
       })
@@ -238,149 +237,62 @@ describe('Sites status', () => {
       });
   });
 
-  it(`Site priority, each site should have a unique priority from 1 to n`, () => {
-    return app
-      .inject({ method: 'GET', url: '/sites/status' })
-      .then((result) => {
-        const priorities = result.json().map((site: any) => site.priority);
-        expect(priorities).toEqual(
-          Array.from({ length: priorities.length }, (_, index) => index + 1),
-        );
-      });
+  it('Level, should return the level computed from the battery', () => {
+    return app.inject({ method: 'GET', url: '/sites/level' }).then((result) => {
+      expect(result.statusCode).toEqual(200);
+      const status = result.json();
+      expect(status.level).toEqual(2);
+      expect(status.label).toEqual('Economy');
+      expect(status.percentage).toEqual(30);
+      expect(status.charging).toBe(false);
+      expect(status.batteryId).toEqual('test-battery');
+      expect(status.error).toBeNull();
+    });
   });
 
-  it(`Site priority, admin should move a site to the first place`, () => {
-    return app
-      .inject({
-        method: 'POST',
-        url: '/sites/carto/settings',
-        headers: { 'content-type': 'application/json' },
-        body: { priority: 1 },
-      })
-      .then((result) => {
-        expect(result.statusCode).toEqual(200);
-        const order = result.json().map((site: any) => site.id);
-        expect(order).toEqual(['carto', 'portail', 'blog']);
-        expect(result.json()[0].priority).toEqual(1);
-      });
+  it('Level, economy should disable images and videos', async () => {
+    const result = await app.inject({ method: 'GET', url: '/sites/portail' });
+    const features = result.json().features;
+    const enabled = (id: string) =>
+      features.find((feature: any) => feature.id === id).enabled;
+    expect(enabled('images')).toBe(false);
+    expect(enabled('videos')).toBe(false);
+    expect(enabled('recherche')).toBe(true);
   });
 
-  it(`Site priority, the new order should be visible in the list`, () => {
-    return app
-      .inject({ method: 'GET', url: '/sites/status' })
-      .then((result) => {
-        expect(result.json().map((site: any) => site.id)).toEqual([
-          'carto',
-          'portail',
-          'blog',
-        ]);
-      });
+  it('Level, survival should keep only the essential services', async () => {
+    energy.reading = { ...energy.reading, percentage: 10 };
+    const result = await refreshLevel();
+    expect(result.statusCode).toEqual(200);
+    expect(result.json().level).toEqual(1);
+    const sitesResult = await app.inject({
+      method: 'GET',
+      url: '/sites/status',
+    });
+    const all = sitesResult.json();
+    const portail = all.find((site: any) => site.id === 'portail');
+    const accueil = portail.services.find((s: any) => s.id === 'accueil');
+    expect(accueil.status).toEqual('active');
+    const blog = all.find((site: any) => site.id === 'blog');
+    const status = (id: string) =>
+      blog.services.find((s: any) => s.id === id).status;
+    expect(status('commentaires')).toEqual('stopped');
+    expect(status('articles')).toEqual('active');
+    expect(all.find((site: any) => site.id === 'carto').active).toBe(false);
   });
 
-  it(`Site priority, admin should move a site to the last place`, () => {
-    return app
-      .inject({
-        method: 'POST',
-        url: '/sites/carto/settings',
-        headers: { 'content-type': 'application/json' },
-        body: { priority: 3 },
-      })
-      .then((result) => {
-        expect(result.json().map((site: any) => site.id)).toEqual([
-          'portail',
-          'blog',
-          'carto',
-        ]);
-      });
-  });
-
-  it(`Site priority, invalid priority should return 400`, async () => {
-    for (const priority of [0, 4, 1.5, '1']) {
-      const result = await app.inject({
-        method: 'POST',
-        url: '/sites/blog/settings',
-        headers: { 'content-type': 'application/json' },
-        body: { priority },
-      });
-      expect(result.statusCode).toEqual(400);
+  it('Level, abundance when the battery is full and charging', async () => {
+    energy.reading = { ...energy.reading, percentage: 95, charging: true };
+    const result = await refreshLevel();
+    expect(result.json().level).toEqual(4);
+    expect(result.json().label).toEqual('Abundance');
+    const sitesResult = await app.inject({
+      method: 'GET',
+      url: '/sites/status',
+    });
+    for (const site of sitesResult.json()) {
+      expect(site.active).toBe(true);
     }
-  });
-
-  it(`Site priority, unknown site should return 404`, () => {
-    return app
-      .inject({
-        method: 'POST',
-        url: '/sites/unknown/settings',
-        headers: { 'content-type': 'application/json' },
-        body: { priority: 1 },
-      })
-      .then((result) => {
-        expect(result.statusCode).toEqual(404);
-      });
-  });
-
-  it(`Site, should stop every service of a site`, () => {
-    return action('portail/stop').then((result) => {
-      expect(result.statusCode).toEqual(200);
-      expect(result.json().active).toBe(false);
-      for (const service of result.json().services) {
-        expect(service.status).toEqual('stopped');
-      }
-    });
-  });
-
-  it(`Site, should start every service of a site`, () => {
-    return action('portail/start').then((result) => {
-      expect(result.statusCode).toEqual(200);
-      expect(result.json().active).toBe(true);
-      for (const service of result.json().services) {
-        expect(service.status).toEqual('active');
-      }
-    });
-  });
-
-  it(`Site, should restart every service of a site`, () => {
-    return action('blog/restart').then((result) => {
-      expect(result.statusCode).toEqual(200);
-      for (const service of result.json().services) {
-        expect(service.status).toEqual('active');
-      }
-    });
-  });
-
-  it(`Site, unknown site action should return 404`, () => {
-    return action('unknown/start').then((result) => {
-      expect(result.statusCode).toEqual(404);
-    });
-  });
-
-  it(`Site always on, admin should keep a site running on low battery`, () => {
-    return app
-      .inject({
-        method: 'POST',
-        url: '/sites/carto/settings',
-        headers: { 'content-type': 'application/json' },
-        body: { alwaysOn: true },
-      })
-      .then((result) => {
-        expect(result.statusCode).toEqual(200);
-        const carto = result.json().find((site: any) => site.id === 'carto');
-        expect(carto.alwaysOn).toBe(true);
-      });
-  });
-
-  it(`Site always on, admin should remove the setting`, () => {
-    return app
-      .inject({
-        method: 'POST',
-        url: '/sites/carto/settings',
-        headers: { 'content-type': 'application/json' },
-        body: { alwaysOn: false },
-      })
-      .then((result) => {
-        const carto = result.json().find((site: any) => site.id === 'carto');
-        expect(carto.alwaysOn).toBe(false);
-      });
   });
 
   afterAll(async () => {
