@@ -1,5 +1,6 @@
 import type { OperatingLevel } from './sites.types.js';
 
+/** Name of each operating level, as returned by the API. */
 export const LEVEL_LABELS: Record<OperatingLevel, string> = {
   0: 'Shutdown',
   1: 'Survival',
@@ -8,6 +9,7 @@ export const LEVEL_LABELS: Record<OperatingLevel, string> = {
   4: 'Abundance',
 };
 
+/** Battery percentages used to pick the operating level. */
 export const LEVEL_THRESHOLDS = {
   shutdown: 5,
   survival: 20,
@@ -15,6 +17,12 @@ export const LEVEL_THRESHOLDS = {
   abundance: 90,
 };
 
+/**
+ * Computes the operating level (0 to 4) from the battery.
+ * Level 4 (abundance) needs a nearly full battery that is charging.
+ * @param percentage battery level, from 0 to 100
+ * @param charging true when the battery is charging
+ */
 export function computeLevel(
   percentage: number,
   charging: boolean,

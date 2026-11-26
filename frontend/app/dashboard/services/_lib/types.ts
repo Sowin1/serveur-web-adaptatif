@@ -2,6 +2,15 @@ export type ServiceStatus = 'active' | 'stopped' | 'error' | 'quarantine';
 
 export type StopSource = 'admin' | 'auto';
 
+export type QuarantineCause = 'start' | 'stop' | 'health' | 'manual';
+
+export interface QuarantineInfo {
+  cause: QuarantineCause;
+  detail: string | null;
+  failures: number;
+  since: string;
+}
+
 export type OperatingLevel = 0 | 1 | 2 | 3 | 4;
 
 export interface Service {
@@ -14,6 +23,7 @@ export interface Service {
   neverAutoStop: boolean;
   failures: number;
   minLevel: OperatingLevel;
+  quarantine: QuarantineInfo | null;
 }
 
 export interface Feature {
@@ -26,9 +36,18 @@ export interface Feature {
 export interface Site {
   id: string;
   name: string;
+  priority: number;
+  alwaysOn: boolean;
   active: boolean;
   services: Service[];
   features: Feature[];
+}
+
+export interface QuarantinedService extends QuarantineInfo {
+  siteId: string;
+  siteName: string;
+  serviceId: string;
+  serviceName: string;
 }
 
 export interface EnergyStatus {
@@ -39,4 +58,14 @@ export interface EnergyStatus {
   batteryId: string | null;
   updatedAt: string | null;
   error: string | null;
+}
+
+export interface SiteSettings {
+  priority?: number;
+  alwaysOn?: boolean;
+}
+
+export interface ServiceSettings {
+  priority?: boolean;
+  neverAutoStop?: boolean;
 }
