@@ -1,0 +1,6 @@
+{
+  "allowAutoRestart": true,
+  "maxRestartAttempts": 2,
+  "maxErrorsPerMinute": 10,
+  "currentMode": 3
+}

@@ -63,7 +63,7 @@ apt install nginx -y
 
 # Retrieve project
 
-BRANCH="feat/installScript"
+BRANCH="main"
 
 curl -fL "https://github.com/Sowin1/serveur-web-adaptatif/archive/refs/heads/${BRANCH}.zip" -o /tmp/srv-projet.zip \
   && unzip -q /tmp/srv-projet.zip \
