@@ -75,6 +75,11 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
         run: pnpm --filter backend test:e2e
+      
+      - name: Cleanup workspace
+        if: always()
+        run: |
+          find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
 
   build-backend:
     needs: unit-test
