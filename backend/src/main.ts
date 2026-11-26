@@ -55,7 +55,7 @@ function trackAndDetectError(): void {
       const data = fs.readFileSync(errorTrackerPath, 'utf8');
       errors = JSON.parse(data);
     }
-  } catch (e) {
+  } catch {
     errors = [];
   }
 
@@ -64,7 +64,7 @@ function trackAndDetectError(): void {
 
   // Ne conserve que les erreurs survenues au cours des 60 dernières secondes
   const oneMinuteAgo = now - 60000;
-  errors = errors.filter(timestamp => timestamp > oneMinuteAgo);
+  errors = errors.filter((timestamp) => timestamp > oneMinuteAgo);
 
   // Sauvegarde l'historique des erreurs
   try {
@@ -75,7 +75,9 @@ function trackAndDetectError(): void {
 
   // Si le nombre d'erreurs dépasse le seuil configuré -> ANOMALIE DÉTECTÉE
   if (errors.length >= config.maxErrorsPerMinute) {
-    console.error(` [ALERTE ANOMALIE] Génération anormale d'erreurs détectée ! (${errors.length} erreurs en moins d'une minute).`);
+    console.error(
+      ` [ALERTE ANOMALIE] Génération anormale d'erreurs détectée ! (${errors.length} erreurs en moins d'une minute).`,
+    );
     // Ici, tu pourrais par exemple basculer automatiquement en mode survie (mode 1)
   }
 }
@@ -92,22 +94,27 @@ function checkBootLoop(): boolean {
       const data = fs.readFileSync(trackerPath, 'utf8');
       history = JSON.parse(data);
     }
-  } catch (e) {
+  } catch {
     history = [];
   }
 
   history.push(now);
   const oneMinuteAgo = now - 60000;
-  history = history.filter(timestamp => timestamp > oneMinuteAgo);
+  history = history.filter((timestamp) => timestamp > oneMinuteAgo);
 
   try {
     fs.writeFileSync(trackerPath, JSON.stringify(history));
   } catch (e) {
-    console.error(' Impossible d’écrire le fichier de suivi des redémarrages :', e);
+    console.error(
+      ' Impossible d’écrire le fichier de suivi des redémarrages :',
+      e,
+    );
   }
 
   if (history.length > config.maxRestartAttempts) {
-    console.error(` [ALERTE CRITIQUE] Limite de ${config.maxRestartAttempts} tentatives de redémarrage dépassée !`);
+    console.error(
+      ` [ALERTE CRITIQUE] Limite de ${config.maxRestartAttempts} tentatives de redémarrage dépassée !`,
+    );
     return false;
   }
 
@@ -122,7 +129,12 @@ async function bootstrap() {
 
   // 2. Gestion globale des erreurs non capturées et enregistrement de l'anomalie
   process.on('unhandledRejection', (reason, promise) => {
-    console.error(' [CRASH ÉVITÉ/ALERTE] Unhandled Rejection at:', promise, 'reason:', reason);
+    console.error(
+      ' [CRASH ÉVITÉ/ALERTE] Unhandled Rejection at:',
+      promise,
+      'reason:',
+      reason,
+    );
     trackAndDetectError();
   });
 
@@ -131,10 +143,14 @@ async function bootstrap() {
     trackAndDetectError();
 
     if (config.allowAutoRestart && canRestart) {
-      console.log(' Redémarrage automatique AUTORISÉ (dans la limite des tentatives).');
+      console.log(
+        ' Redémarrage automatique AUTORISÉ (dans la limite des tentatives).',
+      );
       process.exit(1);
     } else {
-      console.log(' Redémarrage automatique BLOQUÉ (limite atteinte ou non autorisé). Arrêt définitif.');
+      console.log(
+        ' Redémarrage automatique BLOQUÉ (limite atteinte ou non autorisé). Arrêt définitif.',
+      );
       process.exit(0);
     }
   });
@@ -205,7 +221,9 @@ async function bootstrap() {
     host: '127.0.0.1',
   });
 
-  console.log(` Le serveur tourne sur http://127.0.0.1:${process.env.PORT ?? 3000}/innovant`);
+  console.log(
+    ` Le serveur tourne sur http://127.0.0.1:${process.env.PORT ?? 3000}/innovant`,
+  );
 }
 
 bootstrap();
