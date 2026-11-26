@@ -185,8 +185,8 @@ describe('Sites status', () => {
   it('Settings, admin should define a priority service', () => {
     return app
       .inject({
-        method: 'PATCH',
-        url: '/sites/blog/services/articles',
+        method: 'POST',
+        url: '/sites/blog/services/articles/settings',
         headers: { 'content-type': 'application/json' },
         body: { priority: true },
       })
@@ -199,8 +199,8 @@ describe('Sites status', () => {
   it('Settings, admin should define a service never stopped automatically', () => {
     return app
       .inject({
-        method: 'PATCH',
-        url: '/sites/blog/services/articles',
+        method: 'POST',
+        url: '/sites/blog/services/articles/settings',
         headers: { 'content-type': 'application/json' },
         body: { neverAutoStop: true },
       })
@@ -214,8 +214,8 @@ describe('Sites status', () => {
   it('Settings, invalid body should return 400', () => {
     return app
       .inject({
-        method: 'PATCH',
-        url: '/sites/blog/services/articles',
+        method: 'POST',
+        url: '/sites/blog/services/articles/settings',
         headers: { 'content-type': 'application/json' },
         body: { priority: 'yes' },
       })
@@ -227,8 +227,8 @@ describe('Sites status', () => {
   it('Settings, empty body should return 400', () => {
     return app
       .inject({
-        method: 'PATCH',
-        url: '/sites/blog/services/articles',
+        method: 'POST',
+        url: '/sites/blog/services/articles/settings',
         headers: { 'content-type': 'application/json' },
         body: {},
       })
