@@ -22,7 +22,7 @@ interface ServerConfig {
   currentMode: number;
 }
 
-// Fonction pour lire la configuration
+// Function to read the configuration
 function getServerConfig(): ServerConfig {
   const defaultConfig: ServerConfig = {
     allowAutoRestart: false,
@@ -43,7 +43,7 @@ function getServerConfig(): ServerConfig {
   return defaultConfig;
 }
 
-// --- DÉTECTION D'ERREURS ANORMALES ---
+// --- DETECTION OF ABNORMAL ERRORS ---
 function trackAndDetectError(): void {
   const errorTrackerPath = path.join(process.cwd(), 'error-tracker.json');
   const now = Date.now();
@@ -59,30 +59,29 @@ function trackAndDetectError(): void {
     errors = [];
   }
 
-  // Ajoute l'erreur actuelle
+  // Add the current error
   errors.push(now);
 
-  // Ne conserve que les erreurs survenues au cours des 60 dernières secondes
+  // Keep only the errors that occurred within the last 60 seconds
   const oneMinuteAgo = now - 60000;
   errors = errors.filter((timestamp) => timestamp > oneMinuteAgo);
 
-  // Sauvegarde l'historique des erreurs
+  // Saves the error history
   try {
     fs.writeFileSync(errorTrackerPath, JSON.stringify(errors));
   } catch (e) {
     console.error(' Impossible d’écrire le fichier de suivi des erreurs :', e);
   }
 
-  // Si le nombre d'erreurs dépasse le seuil configuré -> ANOMALIE DÉTECTÉE
+  // If the number of errors exceeds the configured threshold -> ANOMALY DETECTED
   if (errors.length >= config.maxErrorsPerMinute) {
     console.error(
       ` [ALERTE ANOMALIE] Génération anormale d'erreurs détectée ! (${errors.length} erreurs en moins d'une minute).`,
     );
-    // Ici, tu pourrais par exemple basculer automatiquement en mode survie (mode 1)
   }
 }
 
-// --- VÉRIFICATION DES TENTATIVES ET DES BOUCLES DE REDÉMARRAGE ---
+// --- VERIFICATION OF ATTEMPTS AND RESTART LOOPS ---
 function checkBootLoop(): boolean {
   const trackerPath = path.join(process.cwd(), 'restart-tracker.json');
   const now = Date.now();
@@ -124,10 +123,10 @@ function checkBootLoop(): boolean {
 async function bootstrap() {
   const config = getServerConfig();
 
-  // 1. Vérification des boucles de redémarrage au lancement
+  // 1. Checking for restart loops at launch
   const canRestart = checkBootLoop();
 
-  // 2. Gestion globale des erreurs non capturées et enregistrement de l'anomalie
+  // 2. Global handling of uncaught errors and logging of the anomaly
   process.on('unhandledRejection', (reason, promise) => {
     console.error(
       ' [CRASH ÉVITÉ/ALERTE] Unhandled Rejection at:',
