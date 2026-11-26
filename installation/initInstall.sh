@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+GREEN='\033[1;32m'
+RED='\033[1;31m'
+NC='\033[0m'
+
 if [[ $EUID -ne 0 ]]; then
-    echo "Erreur : initInstall.sh doit être lancé par installation.sh avec sudo"
+    echo -e "${RED}Erreur : initInstall.sh doit être lancé par installation.sh avec sudo${NC}"
     exit 1
 fi
+
 PROJECT_DIR="$(realpath -e "$PROJECT_DIR")"
 INSTALLATION_DIR="$(realpath -e "$INSTALLATION_DIR")"
 
@@ -141,4 +146,4 @@ rm -rf frontend/app \
 
 rm -rf "$INSTALLATION_DIR"
 
-echo "Installation completed"
+echo -e "${GREEN}Installation completed${NC}"

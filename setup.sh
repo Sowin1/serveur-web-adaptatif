@@ -2,13 +2,12 @@
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
-BLUE='\033[0;34m'
 NC='\033[0m'
 
 function interaction() {
-  echo -e "${BLUE}---------------------"
+  echo "---------------------"
   echo " Initialisation du projet"
-  echo -e "---------------------${NC}"
+  echo "---------------------"
   echo ""
   echo " 1) Tout en un"
   echo " 2) Configurer pnpm"
@@ -79,10 +78,10 @@ function dpdInstall() {
 function codeLintFix() {
   verification
 
-  echo -e "${BLUE}Formatage du code${NC}"
+  echo "Formatage du code"
   pnpm run format
 
-  echo -e "${BLUE}Correction du lint${NC}"
+  echo "Correction du lint"
   pnpm run lint:fix
 
   echo -e "${GREEN}Formatage et lint terminés${NC}"

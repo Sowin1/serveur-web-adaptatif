@@ -7,14 +7,18 @@ export INSTALLATION_DIR="$BASE_DIR/installation"
 
 cd "$BASE_DIR"
 
+GREEN='\033[1;32m'
+RED='\033[1;31m'
+NC='\033[0m'
+
 # Vérification des droits
 if [[ $EUID -ne 0 ]]; then
-    echo "Erreur : exécutez ce script avec sudo"
+    echo -e "${RED}Erreur : exécutez ce script avec sudo${NC}"
     exit 1
 fi
 
 if [[ ! -f /etc/os-release ]]; then
-    echo "Système non reconnu"
+    echo -e "${RED}Système non reconnu${NC}"
     exit 1
 fi
 
@@ -23,7 +27,7 @@ source /etc/os-release
 if [[ "$ID" != "debian" && "$ID" != "ubuntu" &&
       " ${ID_LIKE:-} " != *" debian "* &&
       " ${ID_LIKE:-} " != *" ubuntu "* ]]; then
-    echo "Distribution non compatible : $ID"
+    echo -e "${RED}Distribution non compatible : $ID${NC}"
     exit 1
 fi
 
