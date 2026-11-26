@@ -5,6 +5,8 @@ if [[ $EUID -ne 0 ]]; then
     echo "Erreur : initInstall.sh doit être lancé par installation.sh avec sudo"
     exit 1
 fi
+PROJECT_DIR="$(realpath -e "$PROJECT_DIR")"
+INSTALLATION_DIR="$(realpath -e "$INSTALLATION_DIR")"
 
 NODE_PATH="$(command -v node)"
 
@@ -108,10 +110,7 @@ systemctl reload nginx
 
 # Cleaning
 
-rm -rf installation/ \
-    installation.sh
-
-cd && cd serveur-web-adaptatif/
+cd "$PROJECT_DIR"
 
 rm -rf backend/src \
        backend/test \
@@ -131,3 +130,9 @@ rm -rf frontend/app \
        frontend/eslint.config.mjs \
        frontend/postcss.config.mjs \
        frontend/next-env.d.ts
+
+# Remove installation files
+
+rm -rf "$INSTALLATION_DIR"
+
+echo "Installation completed"

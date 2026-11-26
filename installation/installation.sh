@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+export BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PROJECT_DIR="$BASE_DIR/serveur-web-adaptatif"
+export INSTALLATION_DIR="$BASE_DIR/installation"
+
+cd "$BASE_DIR"
+
 # Vérification des droits
 if [[ $EUID -ne 0 ]]; then
     echo "Erreur : exécutez ce script avec sudo"
@@ -64,11 +70,7 @@ curl -fL "https://github.com/Sowin1/serveur-web-adaptatif/archive/refs/heads/${B
 
 # Installation of project deps
 
-mv installation/ ../
-cd ..
-
-export PROJECT_DIR="$(pwd)/serveur-web-adaptatif"
-export INSTALLATION_DIR="$(pwd)/installation"
+mv "$PROJECT_DIR/installation" "$INSTALLATION_DIR"
 
 node "$INSTALLATION_DIR/installServer.mjs"
 
