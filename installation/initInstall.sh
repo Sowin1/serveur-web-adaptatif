@@ -110,6 +110,12 @@ systemctl reload nginx
 
 # Cleaning
 
+rm -rf "$PROJECT_DIR/hooks"
+
+rm -f "$BASE_DIR/installation.sh" \
+      "$PROJECT_DIR/setup.sh" \
+      "$PROJECT_DIR/README.md"
+
 cd "$PROJECT_DIR"
 
 rm -rf backend/src \
