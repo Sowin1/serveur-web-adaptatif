@@ -5,7 +5,7 @@ export class HealthService {
   getHealthStatus() {
     return {
       status: 'ok',
-      uptime: process.uptime(), // Temps depuis lequel le serveur tourne
+      uptime: process.uptime(), // Time the server has been running
       timestamp: new Date().toISOString(),
       memoryUsage: process.memoryUsage(),
     };
