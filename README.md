@@ -267,6 +267,28 @@ $ pnpm run test:e2e
 $ pnpm run test:cov
 ```
 
+Actions autorisées par niveau
+
+Fichier : `backend/src/engine/rules.ts` · Tests : `backend/test/unit/rules.spec.ts`
+
+| Action | 0 Arrêt | 1 Survie | 2 Économie | 3 Normal | 4 Abondante |
+|---|---|---|---|---|---|
+| Servir le cache | non | oui | oui | oui | oui |
+| Générer à la demande | non | non | pages prioritaires | oui | oui |
+| Régénérer les pages périmées | non | non | non | oui | oui |
+| Pré-générer | non | non | non | si baisse prévue | oui |
+| Compression maximale | non | non | non | non | oui |
+| Contenu hors ligne | non | non | non | non | oui |
+| Arrêt propre | oui | non | non | non | non |
+
+
+### Lancer les tests
+
+```bash
+cd backend
+pnpm test:unit
+```
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
