@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export interface DormantServiceConfig {
+export interface SleepingServiceConfig {
   serviceName: string;
   lastAccessTime: number;
   inactivityThresholdMinutes: number;
@@ -10,9 +10,9 @@ export interface DormantServiceConfig {
 }
 
 @Injectable()
-export class DormantService {
-  private logger = new Logger(DormantService.name);
-  private services: DormantServiceConfig[] = [
+export class SleepingService {
+  private logger = new Logger(SleepingService.name);
+  private services: SleepingServiceConfig[] = [
     {
       serviceName: 'blog-site',
       lastAccessTime: Date.now(),
@@ -112,7 +112,7 @@ export class DormantService {
     });
   }
 
-  getServicesStatus(): DormantServiceConfig[] {
+  getServicesStatus(): SleepingServiceConfig[] {
     return this.services;
   }
 }
